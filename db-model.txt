@@ -1,0 +1,45 @@
+users
+    id          long
+    username    string
+    password    string
+    type        int
+    status      int
+    auth_status int
+    balance     double
+    timestamps
+
+transports
+    id
+    user_id         long
+    can_be_rented   bool
+    type_id         string
+    model           string
+    color           string
+    identifier      string
+    description     string null
+    latitude        double
+    longitude       double
+    minute_price    double null
+    day_price       double null
+    timestamps
+
+transport_types
+    id      int
+    title   string
+    status  int
+
+rental
+    id              long
+    type_id         int
+    transport_id    long
+    time_start      timestamp
+    time_end        timestamp    null
+    price_of_unit   double
+    price_type      int
+    final_price     double null
+    timestamps
+
+rent_types
+    id      int
+    title   string
+    status  int
