@@ -19,7 +19,7 @@ func registerDb() error {
 		dbConf["password"],
 		dbConf["name"],
 		dbConf["ssl"])
-	return orm.RegisterDataBase("default", c("database::driver"), cfg)
+	return orm.RegisterDataBase("default", dbConf["driver"], cfg)
 }
 
 func main() {

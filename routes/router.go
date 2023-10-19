@@ -25,40 +25,8 @@ func init() {
 	}))
 
 	ns := web.NewNamespace("/api").
-		Namespace()
+		Namespace() // TODO
 
-	ns = web.NewNamespace("/v1",
-
-		web.NSNamespace("/rental",
-			web.NSInclude(
-				&controllers.RentController{},
-			),
-		),
-
-		web.NSNamespace("/rent_types",
-			web.NSInclude(
-				&controllers.RentTypesController{},
-			),
-		),
-
-		web.NSNamespace("/transports",
-			web.NSInclude(
-				&controllers.TransportController{},
-			),
-		),
-
-		web.NSNamespace("/users",
-			web.NSInclude(
-				&controllers.AccountController{},
-			),
-		),
-
-		web.NSNamespace("/transport_types",
-			web.NSInclude(
-				&controllers.TransportTypesController{},
-			),
-		),
-	)
 	web.AddNamespace(ns)
 }
 
