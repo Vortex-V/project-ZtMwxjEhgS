@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	_ "app/routes"
@@ -10,24 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func registerDb() error {
-	var dbConf, _ = web.AppConfig.GetSection("database")
-	cfg := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		dbConf["host"],
-		dbConf["port"],
-		dbConf["user"],
-		dbConf["password"],
-		dbConf["name"],
-		dbConf["ssl"])
-	return orm.RegisterDataBase("default", dbConf["driver"], cfg)
-}
-
 func main() {
-	if err := registerDb(); err != nil {
-		logs.Error("%s", err)
-		return
-	}
-
 	if web.BConfig.RunMode == web.DEV {
 		logs.Warn("Run mode DEV")
 		orm.Debug = true

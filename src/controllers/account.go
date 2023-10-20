@@ -1,40 +1,69 @@
 package controllers
 
 import (
+	"app/src/components/auth"
+	"app/src/components/requests"
 	"app/src/models"
 	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-// AccountController operations for Accounts
+// AccountController operations for Account
 type AccountController struct {
-	beego.Controller
+	controller
 }
 
-// URLMapping ...
-func (c *AccountController) URLMapping() {
-	c.Mapping("Post", c.Post)
-	c.Mapping("GetOne", c.GetOne)
-	c.Mapping("GetAll", c.GetAll)
-	c.Mapping("Put", c.Put)
-	c.Mapping("Delete", c.Delete)
+// SignUp
+// @Title SignUp
+// @Description create Account
+// @Param	body		body 	models.SignUpRequest	true
+// @Success 201 {int} models.Account
+// @router /SignUp [post]
+func (c *AccountController) SignUp() {
+	var data requests.SignUpRequest
+	err := c.parseRequestBody(&data)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+		c.response(validationErrors, 400)
+		return
+	}
+
+	password, err := auth.HashPassword(data.Password)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	account := models.Account{
+		Username: data.Username,
+		Password: password,
+	}
+	_, err = models.Insert(&account)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	c.response(dataMap{}, 201) // TODO responses.Account
 }
 
 // Post ...
 // @Title Post
-// @Description create Accounts
-// @Param	body		body 	models.Accounts	true		"body for Accounts content"
-// @Success 201 {int} models.Accounts
+// @Description create Account
+// @Param	body		body 	models.Account	true		"body for Account content"
+// @Success 201 {int} models.Account
 // @Failure 403 body is empty
 // @router / [post]
 func (c *AccountController) Post() {
-	var v models.Accounts
+	var v models.Account
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddAccounts(&v); err == nil {
+		if _, err := models.AddAccount(&v); err == nil {
 			c.Ctx.Output.SetStatus(201)
 			c.Data["json"] = v
 		} else {
@@ -48,15 +77,15 @@ func (c *AccountController) Post() {
 
 // GetOne ...
 // @Title Get One
-// @Description get Accounts by id
+// @Description get Account by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Accounts
+// @Success 200 {object} models.Account
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *AccountController) GetOne() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetAccountsById(id)
+	v, err := models.GetAccountById(id)
 	if err != nil {
 		c.Data["json"] = err.Error()
 	} else {
@@ -67,14 +96,14 @@ func (c *AccountController) GetOne() {
 
 // GetAll ...
 // @Title Get All
-// @Description get Accounts
+// @Description get Account
 // @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
 // @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
 // @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.Accounts
+// @Success 200 {object} models.Account
 // @Failure 403
 // @router / [get]
 func (c *AccountController) GetAll() {
@@ -119,7 +148,7 @@ func (c *AccountController) GetAll() {
 		}
 	}
 
-	l, err := models.GetAllAccounts(query, fields, sortby, order, offset, limit)
+	l, err := models.GetAllAccount(query, fields, sortby, order, offset, limit)
 	if err != nil {
 		c.Data["json"] = err.Error()
 	} else {
@@ -130,18 +159,18 @@ func (c *AccountController) GetAll() {
 
 // Put ...
 // @Title Put
-// @Description update the Accounts
+// @Description update the Account
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Accounts	true		"body for Accounts content"
-// @Success 200 {object} models.Accounts
+// @Param	body		body 	models.Account	true		"body for Account content"
+// @Success 200 {object} models.Account
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *AccountController) Put() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	v := models.Accounts{Id: id}
+	v := models.Account{Id: id}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if err := models.UpdateAccountsById(&v); err == nil {
+		if err := models.UpdateAccountById(&v); err == nil {
 			c.Data["json"] = "OK"
 		} else {
 			c.Data["json"] = err.Error()
@@ -154,7 +183,7 @@ func (c *AccountController) Put() {
 
 // Delete ...
 // @Title Delete
-// @Description delete the Accounts
+// @Description delete the Account
 // @Param	id		path 	string	true		"The id you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 id is empty
@@ -162,7 +191,7 @@ func (c *AccountController) Put() {
 func (c *AccountController) Delete() {
 	idStr := c.Ctx.Input.Param(":id")
 	id, _ := strconv.Atoi(idStr)
-	if err := models.DeleteAccounts(id); err == nil {
+	if err := models.DeleteAccount(id); err == nil {
 		c.Data["json"] = "OK"
 	} else {
 		c.Data["json"] = err.Error()

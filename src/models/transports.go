@@ -12,7 +12,7 @@ import (
 
 type Transports struct {
 	Id          int             `orm:"column(id);pk"`
-	UserId      *Accounts       `orm:"column(user_id);rel(fk)"`
+	AccountId   *Account        `orm:"column(user_id);rel(fk)"`
 	CanBeRented bool            `orm:"column(can_be_rented)"`
 	TypeId      *TransportTypes `orm:"column(type_id);rel(fk)"`
 	Model       string          `orm:"column(model)"`

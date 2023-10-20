@@ -12,7 +12,7 @@ import (
 
 type Rental struct {
 	Id          int         `orm:"column(id);pk"`
-	UserId      *Accounts   `orm:"column(user_id);rel(fk)"`
+	AccountId   *Account    `orm:"column(user_id);rel(fk)"`
 	TypeId      *RentTypes  `orm:"column(type_id);rel(fk)"`
 	TransportId *Transports `orm:"column(transport_id);rel(fk)"`
 	TimeStart   time.Time   `orm:"column(time_start);type(timestamp without time zone);null;auto_now_add"`

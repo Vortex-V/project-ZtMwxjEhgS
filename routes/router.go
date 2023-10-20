@@ -9,9 +9,8 @@ package routers
 
 import (
 	"app/src/controllers"
-	"github.com/beego/beego/v2/server/web/filter/cors"
-
 	"github.com/beego/beego/v2/server/web"
+	"github.com/beego/beego/v2/server/web/filter/cors"
 )
 
 func init() {
@@ -25,7 +24,7 @@ func init() {
 	}))
 
 	ns := web.NewNamespace("/api").
-		Namespace() // TODO
+		Namespace(Account()) // TODO
 
 	web.AddNamespace(ns)
 }
@@ -33,11 +32,11 @@ func init() {
 func Account() *web.Namespace {
 	controller := &controllers.AccountController{}
 	return web.NewNamespace("/Account").
-		Router("/Me", controller, "get:Me").
-		Router("/SignIn", controller, "post:SignIn").
-		Router("/SignUp", controller, "post:SignUp").
-		Router("/SignOut", controller, "post:SignOut").
-		Router("/Update", controller, "put:Update")
+		// Router("/Me", controller, "get:Me").
+		// Router("/SignIn", controller, "post:SignIn").
+		Router("/SignUp", controller, "post:SignUp")
+	// Router("/SignOut", controller, "post:SignOut").
+	// Router("/Update", controller, "put:Update")
 }
 
 func Transport() *web.Namespace {

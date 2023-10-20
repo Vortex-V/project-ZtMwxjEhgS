@@ -10,51 +10,52 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-type Accounts struct {
-	Id            int       `orm:"column(id);pk"`
-	Username      string    `orm:"column(username)"`
+type Account struct {
+	model
+	Id            int       `orm:"column(id);auto;pk"`
+	Username      string    `orm:"column(username);unique"`
 	Password      string    `orm:"column(password)"`
-	Type          int       `orm:"column(type)"`
-	Status        int       `orm:"column(status)"`
-	IsNeedRelogin bool      `orm:"column(is_need_relogin)"`
-	Balance       float64   `orm:"column(balance)"`
+	Type          int       `orm:"column(type);" default:"1"`
+	Status        int       `orm:"column(status)" default:"1"`
+	IsNeedRelogin bool      `orm:"column(is_need_relogin);" default:"false"`
+	Balance       float64   `orm:"column(balance);default(0)"`
 	CreatedAt     time.Time `orm:"column(created_at);type(timestamp without time zone);null;auto_now_add"`
-	UpdatedAt     time.Time `orm:"column(updated_at);type(timestamp without time zone);null;auto_now_add"`
+	UpdatedAt     time.Time `orm:"column(updated_at);type(timestamp without time zone);null;auto_now"`
 }
 
-func (t *Accounts) TableName() string {
+func (t *Account) TableName() string {
 	return "users"
 }
 
 func init() {
-	orm.RegisterModel(new(Accounts))
+	orm.RegisterModel(new(Account))
 }
 
-// AddAccounts insert a new Accounts into database and returns
+// AddAccount insert a new Account into database and returns
 // last inserted Id on success.
-func AddAccounts(m *Accounts) (id int64, err error) {
+func AddAccount(m *Account) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetAccountsById retrieves Accounts by Id. Returns error if
+// GetAccountById retrieves Account by Id. Returns error if
 // Id doesn't exist
-func GetAccountsById(id int) (v *Accounts, err error) {
+func GetAccountById(id int) (v *Account, err error) {
 	o := orm.NewOrm()
-	v = &Accounts{Id: id}
+	v = &Account{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllAccounts retrieves all Accounts matches certain condition. Returns empty list if
+// GetAllAccount retrieves all Account matches certain condition. Returns empty list if
 // no records exist
-func GetAllAccounts(query map[string]string, fields []string, sortby []string, order []string,
+func GetAllAccount(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Accounts))
+	qs := o.QueryTable(new(Account))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
@@ -104,7 +105,7 @@ func GetAllAccounts(query map[string]string, fields []string, sortby []string, o
 		}
 	}
 
-	var l []Accounts
+	var l []Account
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -127,11 +128,11 @@ func GetAllAccounts(query map[string]string, fields []string, sortby []string, o
 	return nil, err
 }
 
-// UpdateAccounts updates Accounts by Id and returns error if
+// UpdateAccount updates Account by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateAccountsById(m *Accounts) (err error) {
+func UpdateAccountById(m *Account) (err error) {
 	o := orm.NewOrm()
-	v := Accounts{Id: m.Id}
+	v := Account{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -142,15 +143,15 @@ func UpdateAccountsById(m *Accounts) (err error) {
 	return
 }
 
-// DeleteAccounts deletes Accounts by Id and returns error if
+// DeleteAccount deletes Account by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteAccounts(id int) (err error) {
+func DeleteAccount(id int) (err error) {
 	o := orm.NewOrm()
-	v := Accounts{Id: id}
+	v := Account{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&Accounts{Id: id}); err == nil {
+		if num, err = o.Delete(&Account{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}
