@@ -30,8 +30,8 @@ func (c *controller) responseError(err error, status int) {
 	c.response(dataMap{"error": err.Error()}, status)
 }
 
-func (c *controller) responseValidateError(data dataMap, status int) {
-	c.response(dataMap{"validateErrors": data}, status)
+func (c *controller) responseValidationError(data dataMap, status int) {
+	c.response(dataMap{"validationErrors": data}, status)
 }
 
 func (c *controller) parseRequestBody(data requests.Request) (err error) {

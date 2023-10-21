@@ -2,7 +2,7 @@
 // @APIVersion 1.0.0
 // @Title Simbir.GO
 // @Host localhost:8080
-package routes
+package routers
 
 import (
 	"app/src/controllers"
@@ -11,6 +11,25 @@ import (
 )
 
 func init() {
+	insertCorsFilter()
+
+	var ns *web.Namespace
+
+	// Выполняет Include контроллеров для автогенерации в swagger
+	// Видимо он парсит файл и ожидает, что они будут записаны именно внутри init и строго в таком формате.
+	// Если попробовать вынести эту этажерку в функцию или записать попроще, то оно будет генерировать пустой path.
+	ns = web.NewNamespace("/api",
+		web.NSNamespace("/Account",
+			web.NSInclude(&controllers.AccountController{}),
+		),
+	)
+
+	ns.Namespace(account()) // TODO
+
+	web.AddNamespace(ns)
+}
+
+func insertCorsFilter() {
 	s, _ := web.AppConfig.String("allowOrigins")
 	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
 		AllowOrigins:     []string{s},
@@ -19,11 +38,6 @@ func init() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-
-	ns := web.NewNamespace("/api").
-		Namespace(account()) // TODO
-
-	web.AddNamespace(ns)
 }
 
 func routeWithAuth(rootpath string, controller web.ControllerInterface, methods string) *web.Namespace {

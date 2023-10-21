@@ -1,0 +1,237 @@
+swagger: "2.0"
+info:
+  title: Simbir.GO
+  version: 1.0.0
+host: localhost:8080
+basePath: /api
+paths:
+  /Account/Me:
+    get:
+      tags:
+      - Account
+      operationId: AccountController.Me
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.AccountMeResponse'
+  /Account/SignIn:
+    post:
+      tags:
+      - Account
+      operationId: AccountController.SignIn
+      parameters:
+      - in: body
+        name: body
+        description: "true"
+        schema:
+          $ref: '#/definitions/requests.AccountRequest'
+      responses:
+        "200":
+          description: '{{"token": "token"}}'
+  /Account/SignOut:
+    post:
+      tags:
+      - Account
+      operationId: AccountController.SignOut
+      responses:
+        "200":
+          description: ""
+  /Account/SignUp:
+    post:
+      tags:
+      - Account
+      operationId: AccountController.SignUp
+      parameters:
+      - in: body
+        name: body
+        description: "true"
+        schema:
+          $ref: '#/definitions/requests.AccountRequest'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.AccountSignUpResponse'
+  /Account/Update:
+    put:
+      tags:
+      - Account
+      operationId: AccountController.Update
+      parameters:
+      - in: body
+        name: body
+        description: "true"
+        schema:
+          $ref: '#/definitions/requests.AccountRequest'
+      responses:
+        "200":
+          description: ""
+definitions:
+  models.Account:
+    title: Account
+    type: object
+    properties:
+      Balance:
+        type: number
+        format: double
+      CreatedAt:
+        type: string
+        format: datetime
+      Id:
+        type: integer
+        format: int64
+      IsNeedRelogin:
+        type: boolean
+      Password:
+        type: string
+      Status:
+        type: integer
+        format: int64
+      Type:
+        type: integer
+        format: int64
+      UpdatedAt:
+        type: string
+        format: datetime
+      Username:
+        type: string
+  models.RentTypes:
+    title: RentTypes
+    type: object
+    properties:
+      Id:
+        type: integer
+        format: int64
+      Status:
+        type: integer
+        format: int64
+      Title:
+        type: string
+  models.Rental:
+    title: Rental
+    type: object
+    properties:
+      AccountId:
+        $ref: '#/definitions/models.Account'
+      CreatedAt:
+        type: string
+        format: datetime
+      FinalPrice:
+        type: number
+        format: double
+      Id:
+        type: integer
+        format: int64
+      PriceOfUnit:
+        type: number
+        format: double
+      Status:
+        type: integer
+        format: int64
+      TimeEnd:
+        type: string
+        format: datetime
+      TimeStart:
+        type: string
+        format: datetime
+      TransportId:
+        $ref: '#/definitions/models.Transports'
+      TypeId:
+        $ref: '#/definitions/models.RentTypes'
+      UpdatedAt:
+        type: string
+        format: datetime
+  models.TransportTypes:
+    title: TransportTypes
+    type: object
+    properties:
+      Id:
+        type: integer
+        format: int64
+      Status:
+        type: integer
+        format: int64
+      Title:
+        type: string
+  models.Transports:
+    title: Transports
+    type: object
+    properties:
+      AccountId:
+        $ref: '#/definitions/models.Account'
+      CanBeRented:
+        type: boolean
+      Color:
+        type: string
+      CreatedAt:
+        type: string
+        format: datetime
+      DayPrice:
+        type: number
+        format: double
+      Description:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      Identifier:
+        type: string
+      Latitude:
+        type: number
+        format: double
+      Longitude:
+        type: number
+        format: double
+      MinutePrice:
+        type: number
+        format: double
+      Model:
+        type: string
+      TypeId:
+        $ref: '#/definitions/models.TransportTypes'
+      UpdatedAt:
+        type: string
+        format: datetime
+  models.model:
+    title: model
+    type: object
+  requests.AccountRequest:
+    title: AccountRequest
+    type: object
+    properties:
+      Password:
+        type: string
+      Username:
+        type: string
+  requests.request:
+    title: request
+    type: object
+  responses.AccountMeResponse:
+    title: AccountMeResponse
+    type: object
+    properties:
+      Balance:
+        type: number
+        format: double
+      Id:
+        type: integer
+        format: int64
+      Username:
+        type: string
+  responses.AccountSignUpResponse:
+    title: AccountSignUpResponse
+    type: object
+    properties:
+      Id:
+        type: integer
+        format: int64
+      Username:
+        type: string
+  responses.response:
+    title: response
+    type: object
+tags:
+- name: Account
+  description: |
+    AccountController operations for Account

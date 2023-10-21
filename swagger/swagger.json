@@ -8,22 +8,103 @@
     "host": "localhost:8080",
     "basePath": "/api",
     "paths": {
-        "/": {
-        },
         "/Account/Me": {
             "get": {
-                "produces": [
-                    "application/json"
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "AccountController.Me",
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/responses.AccountMeResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/Account/SignIn": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "AccountController.SignIn",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "true",
+                        "schema": {
+                            "$ref": "#/definitions/requests.AccountRequest"
+                        }
+                    }
                 ],
                 "responses": {
                     "200": {
-                        "description": "success",
+                        "description": "{{\"token\": \"token\"}}"
+                    }
+                }
+            }
+        },
+        "/Account/SignOut": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "AccountController.SignOut",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/Account/SignUp": {
+            "post": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "AccountController.SignUp",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "true",
                         "schema": {
-                            "type": "object",
-                            "items": {
-                                "$ref": "#/definitions/responses.AccountMeResponse"
-                            }
+                            "$ref": "#/definitions/requests.AccountRequest"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/responses.AccountSignUpResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/Account/Update": {
+            "put": {
+                "tags": [
+                    "Account"
+                ],
+                "operationId": "AccountController.Update",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "true",
+                        "schema": {
+                            "$ref": "#/definitions/requests.AccountRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
                     }
                 }
             }
@@ -259,5 +340,11 @@
             "title": "response",
             "type": "object"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Account",
+            "description": "AccountController operations for Account\n"
+        }
+    ]
 }

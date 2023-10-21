@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "app/routes"
+	_ "app/routers"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"

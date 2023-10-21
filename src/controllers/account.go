@@ -8,7 +8,7 @@ import (
 	"errors"
 )
 
-// AccountController operations for /Account
+// AccountController operations for Account
 type AccountController struct {
 	controller
 }
@@ -35,7 +35,8 @@ func (c *AccountController) Me() {
 
 // SignIn
 // @Title SignIn
-// @Success 200 {"token": "token"}
+// @Param	body	body	requests.AccountRequest	true
+// @Success 200 {{"token": "token"}}
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountRequest
@@ -47,7 +48,7 @@ func (c *AccountController) SignIn() {
 	}
 
 	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidateError(validationErrors, 400)
+		c.responseValidationError(validationErrors, 400)
 		return
 	}
 
@@ -90,7 +91,7 @@ func (c *AccountController) SignUp() {
 	}
 
 	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidateError(validationErrors, 400)
+		c.responseValidationError(validationErrors, 400)
 		return
 	}
 
@@ -145,7 +146,7 @@ func (c *AccountController) SignOut() {
 // @Title Update
 // @Param	body	body	requests.AccountRequest	true
 // @Success 200
-// @router /SignUp [put]
+// @router /Update [put]
 func (c *AccountController) Update() {
 	id, err := c.GetInt(":id")
 	if err != nil {
@@ -160,7 +161,7 @@ func (c *AccountController) Update() {
 	}
 
 	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidateError(validationErrors, 400)
+		c.responseValidationError(validationErrors, 400)
 		return
 	}
 
