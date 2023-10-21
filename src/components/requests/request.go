@@ -4,13 +4,14 @@ import (
 	"github.com/beego/beego/v2/core/validation"
 )
 
+// Request
+// Содаём тип интерфейса и структуру, указатель на которую его реализует
 type Request interface {
-	implement()
+	implement(_ Request)
 }
+type request struct{}
 
-type request struct {
-	Request
-}
+func (r *request) implement(_ Request) {}
 
 func init() {
 	validation.SetDefaultMessage(map[string]string{

@@ -8,14 +8,14 @@ import (
 	"errors"
 )
 
-// AccountController operations for AccountSignUpResponse
+// AccountController operations for /Account
 type AccountController struct {
 	controller
 }
 
 // Me
 // @Title Me
-// @Success 200 	responses.AccountMeResponse
+// @Success	200	{object}	responses.AccountMeResponse
 // @router /Me [get]
 func (c *AccountController) Me() {
 	id, err := c.GetInt(":id")
@@ -35,8 +35,7 @@ func (c *AccountController) Me() {
 
 // SignIn
 // @Title SignIn
-// @Param	body		body 	models.SignUpRequest	true
-// @Success 200
+// @Success 200 {"token": "token"}
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountRequest
@@ -47,7 +46,7 @@ func (c *AccountController) SignIn() {
 		return
 	}
 
-	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
 		c.responseValidateError(validationErrors, 400)
 		return
 	}
@@ -79,8 +78,8 @@ func (c *AccountController) SignIn() {
 
 // SignUp
 // @Title SignUp
-// @Param	body		body 	models.SignUpRequest	true
-// @Success 200 	responses.AccountSignUpResponse
+// @Param	body	body	requests.AccountRequest	true
+// @Success	200	{object}	responses.AccountSignUpResponse
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountRequest
@@ -90,7 +89,7 @@ func (c *AccountController) SignUp() {
 		return
 	}
 
-	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
 		c.responseValidateError(validationErrors, 400)
 		return
 	}
@@ -144,6 +143,7 @@ func (c *AccountController) SignOut() {
 
 // Update
 // @Title Update
+// @Param	body	body	requests.AccountRequest	true
 // @Success 200
 // @router /SignUp [put]
 func (c *AccountController) Update() {
@@ -159,7 +159,7 @@ func (c *AccountController) Update() {
 		return
 	}
 
-	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
 		c.responseValidateError(validationErrors, 400)
 		return
 	}
