@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"app/src/models"
 	"fmt"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
@@ -32,6 +33,15 @@ func authFilter(ctx *context.Context) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		ctx.Input.SetData("accountId", (int)(claims["id"].(float64)))
+		id := (int)(claims["id"].(float64))
+		query := models.Find(new(models.Account), "is_need_relogin").Where("id = ?")
+		var isNeedRelogin bool
+		models.Raw(query, id).QueryRow(&isNeedRelogin)
+		if isNeedRelogin {
+			ctx.Output.SetStatus(401)
+			ctx.Output.Body([]byte("Invalid or expired token"))
+			return
+		}
+		ctx.Input.SetData("accountId", id)
 	}
 }

@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -15,8 +14,6 @@ var (
 )
 
 func init() {
-
-	// TODO перенести
 	var dbConf, _ = web.AppConfig.GetSection("database")
 	cfg := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		dbConf["host"],
@@ -35,49 +32,39 @@ func init() {
 	qb, _ = orm.NewQueryBuilder(driver)
 }
 
+// Model
+// Содаём тип интерфейса и структуру, указатель на которую его реализует
 type Model interface {
-	implement()
+	implement(_ Model)
 }
+type model struct{}
 
-type model struct {
-	Model
+func (m *model) implement(_ Model) {}
+
+// Функции Get, Insert, Update, Delete, Exists
+// позволяют однозначно определить,
+// что необходимо передавать указатель на Model в качестве параметра.
+// Базовые функции orm.Ormer не защищают от этого и работают некорректно,
+// если передавать не указатель.
+
+func Get(model Model, by ...string) (err error) {
+	return o.Read(model, by...)
 }
 
 func Insert(model Model) (int64, error) {
 	return o.Insert(model)
 }
 
-func Delete(model Model) error {
-	_, err := o.Delete(model)
-	return err
+func Update(model Model, cols ...string) (int64, error) {
+	return o.Update(model, cols...)
 }
 
-func Update(model Model) (int64, error) {
-	return o.Update(model)
+func Delete(model Model) (int64, error) {
+	num, err := o.Delete(model)
+	return num, err
 }
 
-func Exists(model Model) (bool, error) {
-	var (
-		result sql.Result
-		count  int64
-		err    error
-	)
-	id := reflect.ValueOf(model).Elem().FieldByName("Id").Int()
-	query := Find(model).Where("id = ?")
-	result, err = SetArgs(query, id).Exec()
-	count, err = result.RowsAffected()
-	return count > 0, err
-}
-
-func Get(model Model) (err error) {
-	id := reflect.ValueOf(model).Elem().FieldByName("Id").Int()
-	if id == 0 {
-		return fmt.Errorf("invalid id: %v", id)
-	}
-	return o.Read(model)
-}
-
-func SetArgs(build orm.QueryBuilder, args ...interface{}) orm.RawSeter {
+func Raw(build orm.QueryBuilder, args ...interface{}) orm.RawSeter {
 	return o.Raw(build.String(), args...)
 }
 

@@ -1,8 +1,14 @@
 package responses
 
-type account struct {
+type AccountSignUpResponse struct {
 	response
-	id       int64
-	username string
-	password string
+	Id       int
+	Username string
+}
+
+type AccountMeResponse struct {
+	response
+	Id       int
+	Username string
+	Balance  float64
 }

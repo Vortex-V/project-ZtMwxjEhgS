@@ -24,7 +24,7 @@ type Account struct {
 }
 
 func (t *Account) TableName() string {
-	return "users"
+	return "accounts"
 }
 
 func init() {

@@ -1,13 +1,27 @@
 package auth
 
 import (
+	"app/src/models"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-func CreateAccessToken(id int) (string, error) {
+func Login(account models.Account) (string, error) {
+	token, err := createAccessToken(account.Id)
+	if err != nil {
+		return "", err
+	}
+	account.IsNeedRelogin = false
+	_, err = models.Update(&account, "IsNeedRelogin")
+	if err != nil {
+		return "", err
+	}
+	return token, nil
+}
+
+func createAccessToken(id int) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["id"] = id
 	claims["exp"] = time.Now().Add(time.Hour * 2).Unix()

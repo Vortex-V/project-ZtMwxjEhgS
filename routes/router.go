@@ -24,19 +24,25 @@ func init() {
 	}))
 
 	ns := web.NewNamespace("/api").
-		Namespace(Account()) // TODO
+		Namespace(account()) // TODO
 
 	web.AddNamespace(ns)
 }
 
-func Account() *web.Namespace {
+func routeWithAuth(rootpath string, controller web.ControllerInterface, methods string) *web.Namespace {
+	return web.NewNamespace(rootpath).
+		Filter("before", authFilter).
+		Router("/", controller, methods)
+}
+
+func account() *web.Namespace {
 	controller := &controllers.AccountController{}
 	return web.NewNamespace("/Account").
-		// Router("/Me", controller, "get:Me").
-		// Router("/SignIn", controller, "post:SignIn").
-		Router("/SignUp", controller, "post:SignUp")
-	// Router("/SignOut", controller, "post:SignOut").
-	// Router("/Update", controller, "put:Update")
+		Namespace(routeWithAuth("/Me", controller, "get:Me")).
+		Router("/SignIn", controller, "post:SignIn").
+		Router("/SignUp", controller, "post:SignUp").
+		Namespace(routeWithAuth("/SignOut", controller, "post:SignOut")).
+		Namespace(routeWithAuth("/Update", controller, "put:Update"))
 }
 
 func Transport() *web.Namespace {

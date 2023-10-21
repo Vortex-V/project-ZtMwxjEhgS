@@ -3,26 +3,44 @@ package controllers
 import (
 	"app/src/components/auth"
 	"app/src/components/requests"
+	"app/src/components/responses"
 	"app/src/models"
-	"encoding/json"
 	"errors"
-	"strconv"
-	"strings"
 )
 
-// AccountController operations for Account
+// AccountController operations for AccountSignUpResponse
 type AccountController struct {
 	controller
 }
 
-// SignUp
-// @Title SignUp
-// @Description create Account
+// Me
+// @Title Me
+// @Success 200 	responses.AccountMeResponse
+// @router /Me [get]
+func (c *AccountController) Me() {
+	id, err := c.GetInt(":id")
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+	account := findModel(id)
+	response, err := responses.MapTo(new(responses.AccountMeResponse), account)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	c.response(response)
+}
+
+// SignIn
+// @Title SignIn
 // @Param	body		body 	models.SignUpRequest	true
-// @Success 201 {int} models.Account
-// @router /SignUp [post]
-func (c *AccountController) SignUp() {
-	var data requests.SignUpRequest
+// @Success 200
+// @router /SignIn [post]
+func (c *AccountController) SignIn() {
+	var data requests.AccountRequest
+
 	err := c.parseRequestBody(&data)
 	if err != nil {
 		c.responseError(err, 500)
@@ -30,7 +48,50 @@ func (c *AccountController) SignUp() {
 	}
 
 	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
-		c.response(validationErrors, 400)
+		c.responseValidateError(validationErrors, 400)
+		return
+	}
+
+	account := models.Account{
+		Username: data.Username,
+	}
+
+	query := models.Find(&account, "id", "password").Where("username = ?")
+	err = models.Raw(query, data.Username).QueryRow(&account)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	if err = auth.CheckPasswordHash(data.Password, account.Password); err != nil {
+		c.responseError(errors.New("username or password is incorrect"), 400)
+		return
+	}
+
+	token, err := auth.Login(account)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	c.response(dataMap{"token": token})
+}
+
+// SignUp
+// @Title SignUp
+// @Param	body		body 	models.SignUpRequest	true
+// @Success 200 	responses.AccountSignUpResponse
+// @router /SignUp [post]
+func (c *AccountController) SignUp() {
+	var data requests.AccountRequest
+	err := c.parseRequestBody(&data)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+		c.responseValidateError(validationErrors, 400)
 		return
 	}
 
@@ -50,151 +111,80 @@ func (c *AccountController) SignUp() {
 		return
 	}
 
-	c.response(dataMap{}, 201) // TODO responses.Account
-}
-
-// Post ...
-// @Title Post
-// @Description create Account
-// @Param	body		body 	models.Account	true		"body for Account content"
-// @Success 201 {int} models.Account
-// @Failure 403 body is empty
-// @router / [post]
-func (c *AccountController) Post() {
-	var v models.Account
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddAccount(&v); err == nil {
-			c.Ctx.Output.SetStatus(201)
-			c.Data["json"] = v
-		} else {
-			c.Data["json"] = err.Error()
-		}
-	} else {
-		c.Data["json"] = err.Error()
-	}
-	c.ServeJSON()
-}
-
-// GetOne ...
-// @Title Get One
-// @Description get Account by id
-// @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Account
-// @Failure 403 :id is empty
-// @router /:id [get]
-func (c *AccountController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetAccountById(id)
+	response, err := responses.MapTo(new(responses.AccountSignUpResponse), &account)
 	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = v
+		c.responseError(err, 500)
+		return
 	}
-	c.ServeJSON()
+
+	c.response(response)
 }
 
-// GetAll ...
-// @Title Get All
-// @Description get Account
-// @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
-// @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
-// @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
-// @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
-// @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
-// @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.Account
-// @Failure 403
-// @router / [get]
-func (c *AccountController) GetAll() {
-	var fields []string
-	var sortby []string
-	var order []string
-	var query = make(map[string]string)
-	var limit int64 = 10
-	var offset int64
-
-	// fields: col1,col2,entity.col3
-	if v := c.GetString("fields"); v != "" {
-		fields = strings.Split(v, ",")
-	}
-	// limit: 10 (default is 10)
-	if v, err := c.GetInt64("limit"); err == nil {
-		limit = v
-	}
-	// offset: 0 (default is 0)
-	if v, err := c.GetInt64("offset"); err == nil {
-		offset = v
-	}
-	// sortby: col1,col2
-	if v := c.GetString("sortby"); v != "" {
-		sortby = strings.Split(v, ",")
-	}
-	// order: desc,asc
-	if v := c.GetString("order"); v != "" {
-		order = strings.Split(v, ",")
-	}
-	// query: k:v,k:v
-	if v := c.GetString("query"); v != "" {
-		for _, cond := range strings.Split(v, ",") {
-			kv := strings.SplitN(cond, ":", 2)
-			if len(kv) != 2 {
-				c.Data["json"] = errors.New("Error: invalid query key/value pair")
-				c.ServeJSON()
-				return
-			}
-			k, v := kv[0], kv[1]
-			query[k] = v
-		}
-	}
-
-	l, err := models.GetAllAccount(query, fields, sortby, order, offset, limit)
+// SignOut
+// @Title SignOut
+// @Success 200
+// @router /SignOut [post]
+func (c *AccountController) SignOut() {
+	id, err := c.GetInt(":id")
 	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = l
+		c.responseError(err, 500)
+		return
 	}
-	c.ServeJSON()
+	account := findModel(id)
+	account.IsNeedRelogin = true
+
+	_, err = models.Update(account, "IsNeedRelogin")
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	c.response(dataMap{"message": "success"})
 }
 
-// Put ...
-// @Title Put
-// @Description update the Account
-// @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Account	true		"body for Account content"
-// @Success 200 {object} models.Account
-// @Failure 403 :id is not int
-// @router /:id [put]
-func (c *AccountController) Put() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v := models.Account{Id: id}
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if err := models.UpdateAccountById(&v); err == nil {
-			c.Data["json"] = "OK"
-		} else {
-			c.Data["json"] = err.Error()
-		}
-	} else {
-		c.Data["json"] = err.Error()
+// Update
+// @Title Update
+// @Success 200
+// @router /SignUp [put]
+func (c *AccountController) Update() {
+	id, err := c.GetInt(":id")
+	if err != nil {
+		c.responseError(err, 500)
+		return
 	}
-	c.ServeJSON()
+	var data requests.AccountUpdateRequest
+	err = c.parseRequestBody(&data)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+		c.responseValidateError(validationErrors, 400)
+		return
+	}
+
+	account := findModel(id)
+	if data.Username != "" {
+		account.Username = data.Username
+	}
+	if data.Password != "" {
+		account.Password = data.Password
+	}
+
+	_, err = models.Update(account)
+	if err != nil {
+		c.responseError(err, 500)
+		return
+	}
+
+	c.response(dataMap{"message": "success"})
 }
 
-// Delete ...
-// @Title Delete
-// @Description delete the Account
-// @Param	id		path 	string	true		"The id you want to delete"
-// @Success 200 {string} delete success!
-// @Failure 403 id is empty
-// @router /:id [delete]
-func (c *AccountController) Delete() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	if err := models.DeleteAccount(id); err == nil {
-		c.Data["json"] = "OK"
-	} else {
-		c.Data["json"] = err.Error()
+func findModel(id int) *models.Account {
+	m := &models.Account{Id: id}
+	if err := models.Get(m); err != nil {
+		return nil
 	}
-	c.ServeJSON()
+	return m
 }

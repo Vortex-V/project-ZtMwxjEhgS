@@ -13,11 +13,11 @@ type controller struct {
 
 type dataMap map[string]interface{}
 
-// Принимает dataMap data и int status
+// Принимает map[string]interface{} data и int status
 func (c *controller) response(data ...interface{}) {
 	for _, arg := range data {
 		switch v := arg.(type) {
-		case dataMap:
+		case dataMap, map[string]interface{}:
 			c.Data["json"] = v
 		case int:
 			c.Ctx.Output.Status = v
@@ -30,6 +30,10 @@ func (c *controller) responseError(err error, status int) {
 	c.response(dataMap{"error": err.Error()}, status)
 }
 
+func (c *controller) responseValidateError(data dataMap, status int) {
+	c.response(dataMap{"validateErrors": data}, status)
+}
+
 func (c *controller) parseRequestBody(data requests.Request) (err error) {
 	err = json.Unmarshal(c.Ctx.Input.RequestBody, data)
 	if err != nil {
@@ -39,14 +43,17 @@ func (c *controller) parseRequestBody(data requests.Request) (err error) {
 	return nil
 }
 
-func validateRequest(data requests.Request) (errors dataMap) {
-	valid := validation.Validation{}
+func validateRequest(data requests.Request) dataMap {
+	var (
+		errors = make(dataMap)
+		valid  = validation.Validation{}
+	)
 	result, err := valid.Valid(data)
 	if err != nil { // Ошибки валидатора
 		errors["error"] = err.Error()
 	} else if !result { // Запрос невалиден
 		for _, err := range valid.Errors {
-			errors[err.Key] = err.Message
+			errors[err.Field] = err.Message
 		}
 	}
 	return errors
