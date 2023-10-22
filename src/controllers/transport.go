@@ -6,7 +6,7 @@ import (
 
 // TransportController operations for /Transport
 type TransportController struct {
-	controller
+	Controller
 }
 
 // Get
@@ -15,6 +15,7 @@ type TransportController struct {
 // @Param	id	path 	int64	true	"id"
 // @Success 200 {object} responses.TransportResponse	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty
+// @Failure 404 not found
 // @router /:id [get]
 func (c *TransportController) Get() {
 
@@ -44,6 +45,7 @@ func (c *TransportController) Post() {
 // @Failure	400	body is invalid
 // @Failure 401 unauthorized
 // @Failure	403	user is not owner
+// @Failure 404 not found
 // @router /:id [put]
 func (c *TransportController) Put() {
 
@@ -54,10 +56,11 @@ func (c *TransportController) Put() {
 // @Description delete the Transport
 // @Security	api_key
 // @Param	id	path 	int64	true	"id"
-// @Success 200	{object} responses.TransportDeleteResponse	Указанный объект может быть получен по ключу data
+// @Success 201
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure	403	user is not owner
+// @Failure 404 not found
 // @router /:id [delete]
 func (c *TransportController) Delete() {
 
@@ -66,7 +69,7 @@ func (c *TransportController) Delete() {
 func (c *TransportController) findModel(id int64) *models.Transport {
 	m := &models.Transport{Id: id}
 	if err := models.Get(m); err != nil {
-		c.responseError(ErrorNotFound, 404)
+		c.ResponseError(ErrorNotFound, 404)
 		return nil
 	}
 	return m

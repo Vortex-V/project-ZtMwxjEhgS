@@ -14,17 +14,17 @@ var (
 	ErrorNotFound = errors.New("not Found")
 )
 
-type controller struct {
+type Controller struct {
 	web.Controller
 }
 
-type dataMap map[string]interface{}
+type DataMap map[string]interface{}
 
-// Принимает map[string]interface{} data и int status
-func (c *controller) response(data ...interface{}) {
+// Response Принимает map[string]interface{} data и int status
+func (c *Controller) Response(data ...interface{}) {
 	for _, arg := range data {
 		switch v := arg.(type) {
-		case dataMap, map[string]interface{}:
+		case DataMap, map[string]interface{}:
 			c.Data["json"] = v
 		case int:
 			c.Ctx.Output.Status = v
@@ -33,15 +33,15 @@ func (c *controller) response(data ...interface{}) {
 	_ = c.ServeJSON()
 }
 
-func (c *controller) responseMapTo(r responses.Response, data ...interface{}) {
+func (c *Controller) ResponseMapTo(r responses.Response, data ...interface{}) {
 	var (
-		result  = make(dataMap)
+		result  = make(DataMap)
 		message string
 		status  int
 	)
 	for _, arg := range data {
 		switch v := arg.(type) {
-		case dataMap:
+		case DataMap:
 			for key, value := range v {
 				result[key] = value
 			}
@@ -54,40 +54,40 @@ func (c *controller) responseMapTo(r responses.Response, data ...interface{}) {
 		}
 	}
 
-	responseData := dataMap{
+	responseData := DataMap{
 		"data": result,
 	}
 	if message != "" {
 		responseData["message"] = message
 	}
 
-	c.response(responseData, status)
+	c.Response(responseData, status)
 }
 
-func (c *controller) responseError(data interface{}, status int) {
+func (c *Controller) ResponseError(data interface{}, status int) {
 	switch data.(type) {
-	case dataMap, string:
-		c.response(dataMap{"error": data}, status)
+	case DataMap, string:
+		c.Response(DataMap{"error": data}, status)
 	default:
-		c.response(status)
+		c.Response(status)
 	}
 }
 
-func (c *controller) load(data requests.Request) bool {
+func (c *Controller) Load(data requests.Request) bool {
 	err := c.parseRequestBody(data)
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return false
 	}
 
 	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
-		c.responseError(validationErrors, 400)
+		c.ResponseError(validationErrors, 400)
 		return false
 	}
 	return true
 }
 
-func (c *controller) parseRequestBody(data requests.Request) (err error) {
+func (c *Controller) parseRequestBody(data requests.Request) (err error) {
 	err = json.Unmarshal(c.Ctx.Input.RequestBody, data)
 	if err != nil {
 		return err
@@ -96,9 +96,9 @@ func (c *controller) parseRequestBody(data requests.Request) (err error) {
 	return nil
 }
 
-func validateRequest(data requests.Request) dataMap {
+func validateRequest(data requests.Request) DataMap {
 	var (
-		errors = make(dataMap)
+		errors = make(DataMap)
 		valid  = validation.Validation{}
 	)
 	result, err := valid.Valid(data)

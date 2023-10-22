@@ -8,7 +8,7 @@ import (
 
 // AccountController operations for Account
 type AccountController struct {
-	controller
+	Controller
 }
 
 // Me
@@ -20,7 +20,7 @@ type AccountController struct {
 func (c *AccountController) Me() {
 	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 	account := c.findModel(id)
@@ -28,7 +28,7 @@ func (c *AccountController) Me() {
 		return
 	}
 
-	c.responseMapTo(new(responses.AccountMeResponse), account)
+	c.ResponseMapTo(new(responses.AccountMeResponse), account)
 }
 
 // SignIn
@@ -39,7 +39,7 @@ func (c *AccountController) Me() {
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountSignInRequest
-	if !c.load(&data) {
+	if !c.Load(&data) {
 		return
 	}
 
@@ -49,11 +49,11 @@ func (c *AccountController) SignIn() {
 
 	token, err := account.Login(data.Password)
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 
-	c.response(dataMap{"token": token})
+	c.Response(DataMap{"token": token})
 }
 
 // SignUp
@@ -64,18 +64,18 @@ func (c *AccountController) SignIn() {
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountSingUpRequest
-	if !c.load(&data) {
+	if !c.Load(&data) {
 		return
 	}
 
 	account := new(models.Account)
 	err := account.Register(data.Username, data.Password)
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 
-	c.responseMapTo(new(responses.AccountSignUpResponse), account, "Аккаунт успешно создан")
+	c.ResponseMapTo(new(responses.AccountSignUpResponse), account, "Аккаунт успешно создан")
 }
 
 // SignOut
@@ -87,7 +87,7 @@ func (c *AccountController) SignUp() {
 func (c *AccountController) SignOut() {
 	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 	account := c.findModel(id)
@@ -99,17 +99,17 @@ func (c *AccountController) SignOut() {
 
 	_, err = models.Update(account, "IsNeedRelogin")
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 
-	c.response(dataMap{"message": "Выполнен выход из аккаунта"})
+	c.Response(DataMap{"message": "Выполнен выход из аккаунта"})
 }
 
 // Update
 // @Title Update
 // @Security	api_key
-// @Param	body	body	requests.AccountSingUpRequest "update request"
+// @Param	body	body	requests.AccountUpdateRequest	"update request"
 // @Success 200
 // @Failure 400	username already exists
 // @Failure 401	unauthorized
@@ -117,11 +117,11 @@ func (c *AccountController) SignOut() {
 func (c *AccountController) Update() {
 	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 	var data requests.AccountUpdateRequest
-	if !c.load(&data) {
+	if !c.Load(&data) {
 		return
 	}
 
@@ -138,17 +138,17 @@ func (c *AccountController) Update() {
 
 	_, err = models.Update(account)
 	if err != nil {
-		c.responseError(err.Error(), 500)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 
-	c.response(dataMap{"message": "Данные успешно изменены"})
+	c.Response(DataMap{"message": "Данные успешно изменены"})
 }
 
 func (c *AccountController) findModel(id int64) *models.Account {
 	m := &models.Account{Id: id}
 	if err := models.Get(m); err != nil {
-		c.responseError(ErrorNotFound, 404)
+		c.ResponseError(ErrorNotFound, 404)
 		return nil
 	}
 	return m

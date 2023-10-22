@@ -1,5 +1,7 @@
 package responses
 
+import "app/src/models"
+
 type (
 	TransportResponse struct {
 		response
@@ -17,8 +19,7 @@ type (
 		DayPrice    float64
 	}
 
-	TransportDeleteResponse struct {
-		response
-		Id int64
+	AdminTransportResponseCollection struct {
+		Transports []models.Transport
 	}
 )

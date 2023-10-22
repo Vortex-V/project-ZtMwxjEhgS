@@ -121,9 +121,9 @@ func AdminRent() *web.Namespace {
 		Router("/Rent/:id:int", controller,
 			"get:Get;"+
 				"put:Put;"+
-				"delete:PutRent").
+				"delete:Delete").
 		Router("/UserHistory/:id:int", controller, "get:UserHistory").
 		Router("/TransportHistory/:id:int", controller, "get:TransportHistory").
-		Router("/Rent", controller, "post:PostRent").
-		Router("/Rent/End/:id:int", controller, "post:RentEnd")
+		Router("/Rent", controller, "post:Post").
+		Router("/Rent/End/:id:int", controller, "post:End")
 }
