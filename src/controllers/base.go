@@ -54,7 +54,7 @@ func (c *controller) responseMapTo(r responses.Response, data ...interface{}) {
 		}
 	}
 
-	responseData := map[string]interface{}{
+	responseData := dataMap{
 		"data": result,
 	}
 	if message != "" {
@@ -76,7 +76,7 @@ func (c *controller) responseError(data interface{}, status int) {
 func (c *controller) load(data requests.Request) bool {
 	err := c.parseRequestBody(data)
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return false
 	}
 

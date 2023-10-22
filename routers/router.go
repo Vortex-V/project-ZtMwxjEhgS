@@ -1,7 +1,10 @@
 // Package routers
 // @APIVersion 1.0.0
 // @Title Simbir.GO
+// @Description API сервиса для работы с арендой транспорта
 // @Host localhost:8080
+// @Schemes http
+// @SecurityDefinition	api_key	apiKey	Authorization	header
 package routers
 
 import (

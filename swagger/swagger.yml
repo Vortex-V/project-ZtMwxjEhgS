@@ -1,9 +1,13 @@
 swagger: "2.0"
 info:
   title: Simbir.GO
+  description: |
+    API сервиса для работы с арендой транспорта
   version: 1.0.0
 host: localhost:8080
 basePath: /api
+schemes:
+- http
 paths:
   /Account/Me:
     get:
@@ -12,11 +16,13 @@ paths:
       operationId: AccountController.Me
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/responses.AccountMeResponse'
         "401":
           description: unauthorized
+      security:
+      - api_key: []
   /Account/SignIn:
     post:
       tags:
@@ -27,10 +33,10 @@ paths:
         name: body
         description: sign in request
         schema:
-          $ref: '#/definitions/requests.AccountRequest'
+          $ref: '#/definitions/requests.AccountSignInRequest'
       responses:
         "200":
-          description: '{token}'
+          description: '{"token":"string"}'
         "400":
           description: user or password is incorrect
   /Account/SignOut:
@@ -43,6 +49,8 @@ paths:
           description: ""
         "401":
           description: unauthorized
+      security:
+      - api_key: []
   /Account/SignUp:
     post:
       tags:
@@ -53,10 +61,10 @@ paths:
         name: body
         description: sign up request
         schema:
-          $ref: '#/definitions/requests.AccountRequest'
+          $ref: '#/definitions/requests.AccountSingUpRequest'
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/responses.AccountSignUpResponse'
         "400":
@@ -71,7 +79,7 @@ paths:
         name: body
         description: update request
         schema:
-          $ref: '#/definitions/requests.AccountRequest'
+          $ref: '#/definitions/requests.AccountSingUpRequest'
       responses:
         "200":
           description: ""
@@ -79,6 +87,8 @@ paths:
           description: username already exists
         "401":
           description: unauthorized
+      security:
+      - api_key: []
   /Transport/:
     post:
       tags:
@@ -95,13 +105,15 @@ paths:
           $ref: '#/definitions/models.Transport'
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/models.Transport'
         "400":
           description: body is invalid
         "401":
           description: unauthorized
+      security:
+      - api_key: []
   /Transport/{id}:
     get:
       tags:
@@ -119,7 +131,7 @@ paths:
         format: int64
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/models.Transport'
         "400":
@@ -145,7 +157,7 @@ paths:
           $ref: '#/definitions/models.Transport'
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/models.Transport'
         "400":
@@ -154,6 +166,8 @@ paths:
           description: unauthorized
         "403":
           description: user is not owner
+      security:
+      - api_key: []
     delete:
       tags:
       - Transport
@@ -177,6 +191,8 @@ paths:
           description: unauthorized
         "403":
           description: user is not owner
+      security:
+      - api_key: []
 definitions:
   models.Account:
     title: Account
@@ -306,8 +322,16 @@ definitions:
   models.model:
     title: model
     type: object
-  requests.AccountRequest:
-    title: AccountRequest
+  requests.AccountSignInRequest:
+    title: AccountSignInRequest
+    type: object
+    properties:
+      Password:
+        type: string
+      Username:
+        type: string
+  requests.AccountSingUpRequest:
+    title: AccountSingUpRequest
     type: object
     properties:
       Password:
@@ -341,6 +365,11 @@ definitions:
   responses.response:
     title: response
     type: object
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: Authorization
+    in: header
 tags:
 - name: Account
   description: |

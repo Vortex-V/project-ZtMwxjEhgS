@@ -6,6 +6,7 @@ import (
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/context"
 	"github.com/golang-jwt/jwt/v5"
+	"strconv"
 	"strings"
 )
 
@@ -33,7 +34,7 @@ func authFilter(ctx *context.Context) {
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		id := (int)(claims["id"].(float64))
+		id := (int64)(claims["id"].(float64))
 		query := models.Find(new(models.Account), "is_need_relogin").Where("id = ?")
 		var isNeedRelogin bool
 		models.Raw(query, id).QueryRow(&isNeedRelogin)
@@ -42,6 +43,6 @@ func authFilter(ctx *context.Context) {
 			ctx.Output.Body([]byte("Invalid or expired token"))
 			return
 		}
-		ctx.Input.SetData("accountId", id)
+		ctx.Input.SetParam("accountId", strconv.FormatInt(id, 10))
 	}
 }

@@ -2,11 +2,15 @@
     "swagger": "2.0",
     "info": {
         "title": "Simbir.GO",
+        "description": "API сервиса для работы с арендой транспорта\n",
         "version": "1.0.0",
         "contact": {}
     },
     "host": "localhost:8080",
     "basePath": "/api",
+    "schemes": [
+        "http"
+    ],
     "paths": {
         "/Account/Me": {
             "get": {
@@ -16,7 +20,7 @@
                 "operationId": "AccountController.Me",
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/responses.AccountMeResponse"
                         }
@@ -24,7 +28,12 @@
                     "401": {
                         "description": "unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         },
         "/Account/SignIn": {
@@ -39,13 +48,13 @@
                         "name": "body",
                         "description": "sign in request",
                         "schema": {
-                            "$ref": "#/definitions/requests.AccountRequest"
+                            "$ref": "#/definitions/requests.AccountSignInRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "{token}"
+                        "description": "{\"token\":\"string\"}"
                     },
                     "400": {
                         "description": "user or password is incorrect"
@@ -66,7 +75,12 @@
                     "401": {
                         "description": "unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         },
         "/Account/SignUp": {
@@ -81,13 +95,13 @@
                         "name": "body",
                         "description": "sign up request",
                         "schema": {
-                            "$ref": "#/definitions/requests.AccountRequest"
+                            "$ref": "#/definitions/requests.AccountSingUpRequest"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/responses.AccountSignUpResponse"
                         }
@@ -110,7 +124,7 @@
                         "name": "body",
                         "description": "update request",
                         "schema": {
-                            "$ref": "#/definitions/requests.AccountRequest"
+                            "$ref": "#/definitions/requests.AccountSingUpRequest"
                         }
                     }
                 ],
@@ -124,7 +138,12 @@
                     "401": {
                         "description": "unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         },
         "/Transport/": {
@@ -146,7 +165,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/models.Transport"
                         }
@@ -157,7 +176,12 @@
                     "401": {
                         "description": "unauthorized"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         },
         "/Transport/{id}": {
@@ -179,7 +203,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/models.Transport"
                         }
@@ -215,7 +239,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/models.Transport"
                         }
@@ -229,7 +253,12 @@
                     "403": {
                         "description": "user is not owner"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -260,7 +289,12 @@
                     "403": {
                         "description": "user is not owner"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
             }
         }
     },
@@ -444,8 +478,20 @@
             "title": "model",
             "type": "object"
         },
-        "requests.AccountRequest": {
-            "title": "AccountRequest",
+        "requests.AccountSignInRequest": {
+            "title": "AccountSignInRequest",
+            "type": "object",
+            "properties": {
+                "Password": {
+                    "type": "string"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "requests.AccountSingUpRequest": {
+            "title": "AccountSingUpRequest",
             "type": "object",
             "properties": {
                 "Password": {
@@ -493,6 +539,13 @@
         "responses.response": {
             "title": "response",
             "type": "object"
+        }
+    },
+    "securityDefinitions": {
+        "api_key": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "tags": [

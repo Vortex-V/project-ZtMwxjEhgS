@@ -13,7 +13,7 @@ type TransportController struct {
 // @Title Get
 // @Description get Transport by Id
 // @Param	id		path 	int64	true	"id"
-// @Success 200 {object} models.Transport
+// @Success 200 {object} models.Transport	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty
 // @router /:id [get]
 func (c *TransportController) Get() {
@@ -23,8 +23,9 @@ func (c *TransportController) Get() {
 // Post
 // @Title Post
 // @Description create Transport
+// @Security	api_key
 // @Param	body	body	models.Transport "transport info"
-// @Success 200	{object}	models.Transport
+// @Success 200	{object}	models.Transport	Указанный объект может быть получен по ключу data
 // @Failure 400 body is invalid
 // @Failure 401 unauthorized
 // @router / [post]
@@ -35,9 +36,10 @@ func (c *TransportController) Post() {
 // Put
 // @Title Put
 // @Description	update the Transport
+// @Security	api_key
 // @Param	id		path 	int64	true	"id"
 // @Param	body	body	models.Transport "transport info"
-// @Success 200	{object}	models.Transport
+// @Success 200	{object}	models.Transport	Указанный объект может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure	400	body is invalid
 // @Failure 401 unauthorized
@@ -50,6 +52,7 @@ func (c *TransportController) Put() {
 // Delete
 // @Title Delete
 // @Description delete the Transport
+// @Security	api_key
 // @Param	id		path 	int64	true	"id"
 // @Success 200
 // @Failure	400	:id is empty

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"app/src/components/auth"
 	"app/src/components/requests"
 	"app/src/components/responses"
 	"app/src/models"
@@ -14,13 +13,14 @@ type AccountController struct {
 
 // Me
 // @Title Me
-// @Success	200	{object}	responses.AccountMeResponse
+// @Security	api_key
+// @Success	200	{object}	responses.AccountMeResponse Указанный объект может быть получен по ключу data
 // @Failure 401	unauthorized
 // @router /Me [get]
 func (c *AccountController) Me() {
-	id, err := c.GetInt(":id")
+	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 	account := c.findModel(id)
@@ -33,13 +33,12 @@ func (c *AccountController) Me() {
 
 // SignIn
 // @Title SignIn
-// @Param	body	body	requests.AccountRequest	"sign in request"
-// @Success 200 {token}
+// @Param	body	body	requests.AccountSignInRequest	"sign in request"
+// @Success 200 {"token":"string"}
 // @Failure 400	user or password is incorrect
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
-	var data requests.AccountRequest
-
+	var data requests.AccountSignInRequest
 	if !c.load(&data) {
 		return
 	}
@@ -48,9 +47,9 @@ func (c *AccountController) SignIn() {
 		Username: data.Username,
 	}
 
-	token, err := auth.Login(&account, data.Password)
+	token, err := account.Login(data.Password)
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 
@@ -59,20 +58,20 @@ func (c *AccountController) SignIn() {
 
 // SignUp
 // @Title SignUp
-// @Param	body	body	requests.AccountRequest	"sign up request"
-// @Success	200	{object}	responses.AccountSignUpResponse
+// @Param	body	body	requests.AccountSingUpRequest	"sign up request"
+// @Success	200	{object}	responses.AccountSignUpResponse	Указанный объект может быть получен по ключу data
 // @Failure 400	username already exists
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
-	var data requests.AccountRequest
+	var data requests.AccountSingUpRequest
 	if !c.load(&data) {
 		return
 	}
 
-	var account models.Account
-	err := account.Register(data)
+	account := new(models.Account)
+	err := account.Register(data.Username, data.Password)
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 
@@ -81,13 +80,14 @@ func (c *AccountController) SignUp() {
 
 // SignOut
 // @Title SignOut
+// @Security	api_key
 // @Success 200
 // @Failure 401	unauthorized
 // @router /SignOut [post]
 func (c *AccountController) SignOut() {
-	id, err := c.GetInt(":id")
+	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 	account := c.findModel(id)
@@ -99,7 +99,7 @@ func (c *AccountController) SignOut() {
 
 	_, err = models.Update(account, "IsNeedRelogin")
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 
@@ -108,15 +108,16 @@ func (c *AccountController) SignOut() {
 
 // Update
 // @Title Update
-// @Param	body	body	requests.AccountRequest "update request"
+// @Security	api_key
+// @Param	body	body	requests.AccountSingUpRequest "update request"
 // @Success 200
 // @Failure 400	username already exists
 // @Failure 401	unauthorized
 // @router /Update [put]
 func (c *AccountController) Update() {
-	id, err := c.GetInt(":id")
+	id, err := c.GetInt64("accountId")
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 	var data requests.AccountUpdateRequest
@@ -137,14 +138,14 @@ func (c *AccountController) Update() {
 
 	_, err = models.Update(account)
 	if err != nil {
-		c.responseError(err, 500)
+		c.responseError(err.Error(), 500)
 		return
 	}
 
 	c.response(dataMap{"message": "Данные успешно изменены"})
 }
 
-func (c *AccountController) findModel(id int) *models.Account {
+func (c *AccountController) findModel(id int64) *models.Account {
 	m := &models.Account{Id: id}
 	if err := models.Get(m); err != nil {
 		c.responseError(ErrorNotFound, 404)
