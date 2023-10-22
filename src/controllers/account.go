@@ -5,7 +5,6 @@ import (
 	"app/src/components/requests"
 	"app/src/components/responses"
 	"app/src/models"
-	"errors"
 )
 
 // AccountController operations for Account
@@ -23,14 +22,12 @@ func (c *AccountController) Me() {
 		c.responseError(err, 500)
 		return
 	}
-	account := findModel(id)
-	response, err := responses.MapTo(new(responses.AccountMeResponse), account)
-	if err != nil {
-		c.responseError(err, 500)
+	account := c.findModel(id)
+	if account == nil {
 		return
 	}
 
-	c.response(response)
+	c.responseMapTo(new(responses.AccountMeResponse), account)
 }
 
 // SignIn
@@ -41,14 +38,7 @@ func (c *AccountController) Me() {
 func (c *AccountController) SignIn() {
 	var data requests.AccountRequest
 
-	err := c.parseRequestBody(&data)
-	if err != nil {
-		c.responseError(err, 500)
-		return
-	}
-
-	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidationError(validationErrors, 400)
+	if !c.load(&data) {
 		return
 	}
 
@@ -56,19 +46,7 @@ func (c *AccountController) SignIn() {
 		Username: data.Username,
 	}
 
-	query := models.Find(&account, "id", "password").Where("username = ?")
-	err = models.Raw(query, data.Username).QueryRow(&account)
-	if err != nil {
-		c.responseError(err, 500)
-		return
-	}
-
-	if err = auth.CheckPasswordHash(data.Password, account.Password); err != nil {
-		c.responseError(errors.New("username or password is incorrect"), 400)
-		return
-	}
-
-	token, err := auth.Login(account)
+	token, err := auth.Login(&account, data.Password)
 	if err != nil {
 		c.responseError(err, 500)
 		return
@@ -84,40 +62,18 @@ func (c *AccountController) SignIn() {
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountRequest
-	err := c.parseRequestBody(&data)
+	if !c.load(&data) {
+		return
+	}
+
+	var account models.Account
+	err := account.Register(data)
 	if err != nil {
 		c.responseError(err, 500)
 		return
 	}
 
-	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidationError(validationErrors, 400)
-		return
-	}
-
-	password, err := auth.HashPassword(data.Password)
-	if err != nil {
-		c.responseError(err, 500)
-		return
-	}
-
-	account := models.Account{
-		Username: data.Username,
-		Password: password,
-	}
-	_, err = models.Insert(&account)
-	if err != nil {
-		c.responseError(err, 500)
-		return
-	}
-
-	response, err := responses.MapTo(new(responses.AccountSignUpResponse), &account)
-	if err != nil {
-		c.responseError(err, 500)
-		return
-	}
-
-	c.response(response)
+	c.responseMapTo(new(responses.AccountSignUpResponse), account, "Аккаунт успешно создан")
 }
 
 // SignOut
@@ -130,7 +86,11 @@ func (c *AccountController) SignOut() {
 		c.responseError(err, 500)
 		return
 	}
-	account := findModel(id)
+	account := c.findModel(id)
+	if account == nil {
+		return
+	}
+
 	account.IsNeedRelogin = true
 
 	_, err = models.Update(account, "IsNeedRelogin")
@@ -154,18 +114,14 @@ func (c *AccountController) Update() {
 		return
 	}
 	var data requests.AccountUpdateRequest
-	err = c.parseRequestBody(&data)
-	if err != nil {
-		c.responseError(err, 500)
+	if !c.load(&data) {
 		return
 	}
 
-	if validationErrors := validateRequest(&data); len(validationErrors) > 0 {
-		c.responseValidationError(validationErrors, 400)
+	account := c.findModel(id)
+	if account == nil {
 		return
 	}
-
-	account := findModel(id)
 	if data.Username != "" {
 		account.Username = data.Username
 	}
@@ -179,12 +135,13 @@ func (c *AccountController) Update() {
 		return
 	}
 
-	c.response(dataMap{"message": "success"})
+	c.response(dataMap{"message": "Данные успешно изменены"})
 }
 
-func findModel(id int) *models.Account {
+func (c *AccountController) findModel(id int) *models.Account {
 	m := &models.Account{Id: id}
 	if err := models.Get(m); err != nil {
+		c.responseError(ErrorNotFound, 404)
 		return nil
 	}
 	return m

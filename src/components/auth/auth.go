@@ -2,19 +2,33 @@ package auth
 
 import (
 	"app/src/models"
+	"errors"
 	"github.com/beego/beego/v2/server/web"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
-func Login(account models.Account) (string, error) {
+var (
+	ErrorUsernameOrPasswordIncorrect = errors.New("username or password is incorrect")
+)
+
+func Login(account *models.Account, password string) (string, error) {
+	err := models.Get(account, "Username")
+	if err != nil {
+		return "", ErrorUsernameOrPasswordIncorrect
+	}
+
+	if err = CheckPasswordHash(password, account.Password); err != nil {
+		return "", ErrorUsernameOrPasswordIncorrect
+	}
+
 	token, err := createAccessToken(account.Id)
 	if err != nil {
 		return "", err
 	}
 	account.IsNeedRelogin = false
-	_, err = models.Update(&account, "IsNeedRelogin")
+	_, err = models.Update(account, "IsNeedRelogin")
 	if err != nil {
 		return "", err
 	}
