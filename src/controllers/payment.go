@@ -11,11 +11,10 @@ type PaymentController struct {
 
 // Hesoyam Post ...
 // @Title Post
-// @Description create Transports
-// @Param	body		body 	models.Transport	true		"body for Transports content"
-// @Success 201 {int} models.Transport
-// @Failure 403 body is empty
-// @router / [post]
-func (c *PaymentController) Hesoyam() {
-	c.ServeJSON()
-}
+// @Description Добавляет на баланс аккаунта с id={accountId} 250 000 денежных единиц.
+// @Param	id	path 	int64	true	"accountId"
+// @Success 201
+// @Failure 401 unauthorized
+// @Failure 404 not found
+// @router /Hesoyam/:id [post]
+func (c *PaymentController) Hesoyam() {}
