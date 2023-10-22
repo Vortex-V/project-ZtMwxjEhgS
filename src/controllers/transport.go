@@ -13,7 +13,7 @@ type TransportController struct {
 // @Title Get
 // @Description get Transport by Id
 // @Param	id		path 	int64	true	"id"
-// @Success 200 {object} models.Transport	Указанный объект может быть получен по ключу data
+// @Success 200 {object} responses.TransportResponse	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty
 // @router /:id [get]
 func (c *TransportController) Get() {
@@ -24,8 +24,8 @@ func (c *TransportController) Get() {
 // @Title Post
 // @Description create Transport
 // @Security	api_key
-// @Param	body	body	models.Transport "transport info"
-// @Success 200	{object}	models.Transport	Указанный объект может быть получен по ключу data
+// @Param	body	body	requests.TransportPostRequest "transport info"
+// @Success 200	{object}	responses.TransportResponse	Указанный объект может быть получен по ключу data
 // @Failure 400 body is invalid
 // @Failure 401 unauthorized
 // @router / [post]
@@ -38,8 +38,8 @@ func (c *TransportController) Post() {
 // @Description	update the Transport
 // @Security	api_key
 // @Param	id		path 	int64	true	"id"
-// @Param	body	body	models.Transport "transport info"
-// @Success 200	{object}	models.Transport	Указанный объект может быть получен по ключу data
+// @Param	body	body	requests.TransportPutRequest "transport info"
+// @Success 200	{object}	responses.TransportResponse	Указанный объект может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure	400	body is invalid
 // @Failure 401 unauthorized
@@ -54,7 +54,7 @@ func (c *TransportController) Put() {
 // @Description delete the Transport
 // @Security	api_key
 // @Param	id		path 	int64	true	"id"
-// @Success 200
+// @Success 200	{object} responses.TransportDeleteResponse	Указанный объект может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure	403	user is not owner
@@ -63,7 +63,7 @@ func (c *TransportController) Delete() {
 
 }
 
-func (c *TransportController) findModel(id int) *models.Transport {
+func (c *TransportController) findModel(id int64) *models.Transport {
 	m := &models.Transport{Id: id}
 	if err := models.Get(m); err != nil {
 		c.responseError(ErrorNotFound, 404)

@@ -103,7 +103,7 @@ func (c *AccountController) SignOut() {
 		return
 	}
 
-	c.response(dataMap{"message": "success"})
+	c.response(dataMap{"message": "Выполнен выход из аккаунта"})
 }
 
 // Update
