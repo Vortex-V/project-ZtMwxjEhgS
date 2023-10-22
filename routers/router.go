@@ -22,6 +22,9 @@ func init() {
 		web.NSNamespace("/Account",
 			web.NSInclude(&controllers.AccountController{}),
 		),
+		web.NSNamespace("/Transport",
+			web.NSInclude(&controllers.TransportController{}),
+		),
 	)
 
 	ns.Namespace(account()) // TODO

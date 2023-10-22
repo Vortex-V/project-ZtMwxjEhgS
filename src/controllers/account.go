@@ -15,6 +15,7 @@ type AccountController struct {
 // Me
 // @Title Me
 // @Success	200	{object}	responses.AccountMeResponse
+// @Failure 401	unauthorized
 // @router /Me [get]
 func (c *AccountController) Me() {
 	id, err := c.GetInt(":id")
@@ -32,8 +33,9 @@ func (c *AccountController) Me() {
 
 // SignIn
 // @Title SignIn
-// @Param	body	body	requests.AccountRequest	true
-// @Success 200 {{"token": "token"}}
+// @Param	body	body	requests.AccountRequest	"sign in request"
+// @Success 200 {token}
+// @Failure 400	user or password is incorrect
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountRequest
@@ -57,8 +59,9 @@ func (c *AccountController) SignIn() {
 
 // SignUp
 // @Title SignUp
-// @Param	body	body	requests.AccountRequest	true
+// @Param	body	body	requests.AccountRequest	"sign up request"
 // @Success	200	{object}	responses.AccountSignUpResponse
+// @Failure 400	username already exists
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountRequest
@@ -79,6 +82,7 @@ func (c *AccountController) SignUp() {
 // SignOut
 // @Title SignOut
 // @Success 200
+// @Failure 401	unauthorized
 // @router /SignOut [post]
 func (c *AccountController) SignOut() {
 	id, err := c.GetInt(":id")
@@ -104,8 +108,10 @@ func (c *AccountController) SignOut() {
 
 // Update
 // @Title Update
-// @Param	body	body	requests.AccountRequest	true
+// @Param	body	body	requests.AccountRequest "update request"
 // @Success 200
+// @Failure 400	username already exists
+// @Failure 401	unauthorized
 // @router /Update [put]
 func (c *AccountController) Update() {
 	id, err := c.GetInt(":id")

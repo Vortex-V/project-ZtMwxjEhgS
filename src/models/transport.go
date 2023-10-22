@@ -10,7 +10,8 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-type Transports struct {
+type Transport struct {
+	model
 	Id          int             `orm:"column(id);pk"`
 	AccountId   *Account        `orm:"column(user_id);rel(fk)"`
 	CanBeRented bool            `orm:"column(can_be_rented)"`
@@ -27,39 +28,39 @@ type Transports struct {
 	UpdatedAt   time.Time       `orm:"column(updated_at);type(timestamp without time zone);auto_now_add"`
 }
 
-func (t *Transports) TableName() string {
+func (t *Transport) TableName() string {
 	return "transports"
 }
 
 func init() {
-	orm.RegisterModel(new(Transports))
+	orm.RegisterModel(new(Transport))
 }
 
-// AddTransports insert a new Transports into database and returns
+// AddTransports insert a new Transport into database and returns
 // last inserted Id on success.
-func AddTransports(m *Transports) (id int64, err error) {
+func AddTransports(m *Transport) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetTransportsById retrieves Transports by Id. Returns error if
+// GetTransportsById retrieves Transport by Id. Returns error if
 // Id doesn't exist
-func GetTransportsById(id int) (v *Transports, err error) {
+func GetTransportsById(id int) (v *Transport, err error) {
 	o := orm.NewOrm()
-	v = &Transports{Id: id}
+	v = &Transport{Id: id}
 	if err = o.Read(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllTransports retrieves all Transports matches certain condition. Returns empty list if
+// GetAllTransports retrieves all Transport matches certain condition. Returns empty list if
 // no records exist
 func GetAllTransports(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Transports))
+	qs := o.QueryTable(new(Transport))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
@@ -109,7 +110,7 @@ func GetAllTransports(query map[string]string, fields []string, sortby []string,
 		}
 	}
 
-	var l []Transports
+	var l []Transport
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -132,11 +133,11 @@ func GetAllTransports(query map[string]string, fields []string, sortby []string,
 	return nil, err
 }
 
-// UpdateTransports updates Transports by Id and returns error if
+// UpdateTransports updates Transport by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateTransportsById(m *Transports) (err error) {
+func UpdateTransportsById(m *Transport) (err error) {
 	o := orm.NewOrm()
-	v := Transports{Id: m.Id}
+	v := Transport{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -147,15 +148,15 @@ func UpdateTransportsById(m *Transports) (err error) {
 	return
 }
 
-// DeleteTransports deletes Transports by Id and returns error if
+// DeleteTransports deletes Transport by Id and returns error if
 // the record to be deleted doesn't exist
 func DeleteTransports(id int) (err error) {
 	o := orm.NewOrm()
-	v := Transports{Id: id}
+	v := Transport{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&Transports{Id: id}); err == nil {
+		if num, err = o.Delete(&Transport{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}

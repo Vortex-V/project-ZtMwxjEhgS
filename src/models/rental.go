@@ -11,17 +11,17 @@ import (
 )
 
 type Rental struct {
-	Id          int         `orm:"column(id);pk"`
-	AccountId   *Account    `orm:"column(user_id);rel(fk)"`
-	TypeId      *RentTypes  `orm:"column(type_id);rel(fk)"`
-	TransportId *Transports `orm:"column(transport_id);rel(fk)"`
-	TimeStart   time.Time   `orm:"column(time_start);type(timestamp without time zone);null;auto_now_add"`
-	TimeEnd     time.Time   `orm:"column(time_end);type(timestamp without time zone);null"`
-	PriceOfUnit float64     `orm:"column(price_of_unit)"`
-	FinalPrice  float64     `orm:"column(final_price);null"`
-	Status      int         `orm:"column(status)"`
-	CreatedAt   time.Time   `orm:"column(created_at);type(timestamp without time zone);auto_now_add"`
-	UpdatedAt   time.Time   `orm:"column(updated_at);type(timestamp without time zone);auto_now_add"`
+	Id          int        `orm:"column(id);pk"`
+	AccountId   *Account   `orm:"column(user_id);rel(fk)"`
+	TypeId      *RentTypes `orm:"column(type_id);rel(fk)"`
+	TransportId *Transport `orm:"column(transport_id);rel(fk)"`
+	TimeStart   time.Time  `orm:"column(time_start);type(timestamp without time zone);null;auto_now_add"`
+	TimeEnd     time.Time  `orm:"column(time_end);type(timestamp without time zone);null"`
+	PriceOfUnit float64    `orm:"column(price_of_unit)"`
+	FinalPrice  float64    `orm:"column(final_price);null"`
+	Status      int        `orm:"column(status)"`
+	CreatedAt   time.Time  `orm:"column(created_at);type(timestamp without time zone);auto_now_add"`
+	UpdatedAt   time.Time  `orm:"column(updated_at);type(timestamp without time zone);auto_now_add"`
 }
 
 func (t *Rental) TableName() string {

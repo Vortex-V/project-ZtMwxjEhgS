@@ -15,6 +15,8 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/responses.AccountMeResponse'
+        "401":
+          description: unauthorized
   /Account/SignIn:
     post:
       tags:
@@ -23,12 +25,14 @@ paths:
       parameters:
       - in: body
         name: body
-        description: "true"
+        description: sign in request
         schema:
           $ref: '#/definitions/requests.AccountRequest'
       responses:
         "200":
-          description: '{{"token": "token"}}'
+          description: '{token}'
+        "400":
+          description: user or password is incorrect
   /Account/SignOut:
     post:
       tags:
@@ -37,6 +41,8 @@ paths:
       responses:
         "200":
           description: ""
+        "401":
+          description: unauthorized
   /Account/SignUp:
     post:
       tags:
@@ -45,7 +51,7 @@ paths:
       parameters:
       - in: body
         name: body
-        description: "true"
+        description: sign up request
         schema:
           $ref: '#/definitions/requests.AccountRequest'
       responses:
@@ -53,6 +59,8 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/responses.AccountSignUpResponse'
+        "400":
+          description: username already exists
   /Account/Update:
     put:
       tags:
@@ -61,12 +69,114 @@ paths:
       parameters:
       - in: body
         name: body
-        description: "true"
+        description: update request
         schema:
           $ref: '#/definitions/requests.AccountRequest'
       responses:
         "200":
           description: ""
+        "400":
+          description: username already exists
+        "401":
+          description: unauthorized
+  /Transport/:
+    post:
+      tags:
+      - Transport
+      description: |-
+        create Transport
+        <br>
+      operationId: TransportController.Post
+      parameters:
+      - in: body
+        name: body
+        description: transport info
+        schema:
+          $ref: '#/definitions/models.Transport'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Transport'
+        "400":
+          description: body is invalid
+        "401":
+          description: unauthorized
+  /Transport/{id}:
+    get:
+      tags:
+      - Transport
+      description: |-
+        get Transport by Id
+        <br>
+      operationId: TransportController.Get
+      parameters:
+      - in: path
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Transport'
+        "400":
+          description: :id is empty
+    put:
+      tags:
+      - Transport
+      description: |-
+        update the Transport
+        <br>
+      operationId: TransportController.Put
+      parameters:
+      - in: path
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: transport info
+        schema:
+          $ref: '#/definitions/models.Transport'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Transport'
+        "400":
+          description: body is invalid
+        "401":
+          description: unauthorized
+        "403":
+          description: user is not owner
+    delete:
+      tags:
+      - Transport
+      description: |-
+        delete the Transport
+        <br>
+      operationId: TransportController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: id
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+        "400":
+          description: :id is empty
+        "401":
+          description: unauthorized
+        "403":
+          description: user is not owner
 definitions:
   models.Account:
     title: Account
@@ -136,26 +246,14 @@ definitions:
         type: string
         format: datetime
       TransportId:
-        $ref: '#/definitions/models.Transports'
+        $ref: '#/definitions/models.Transport'
       TypeId:
         $ref: '#/definitions/models.RentTypes'
       UpdatedAt:
         type: string
         format: datetime
-  models.TransportTypes:
-    title: TransportTypes
-    type: object
-    properties:
-      Id:
-        type: integer
-        format: int64
-      Status:
-        type: integer
-        format: int64
-      Title:
-        type: string
-  models.Transports:
-    title: Transports
+  models.Transport:
+    title: Transport
     type: object
     properties:
       AccountId:
@@ -193,6 +291,18 @@ definitions:
       UpdatedAt:
         type: string
         format: datetime
+  models.TransportTypes:
+    title: TransportTypes
+    type: object
+    properties:
+      Id:
+        type: integer
+        format: int64
+      Status:
+        type: integer
+        format: int64
+      Title:
+        type: string
   models.model:
     title: model
     type: object
@@ -235,3 +345,6 @@ tags:
 - name: Account
   description: |
     AccountController operations for Account
+- name: Transport
+  description: |
+    TransportController operations for /Transport

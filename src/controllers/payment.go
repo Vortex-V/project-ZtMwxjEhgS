@@ -12,8 +12,8 @@ type PaymentController struct {
 // Hesoyam Post ...
 // @Title Post
 // @Description create Transports
-// @Param	body		body 	models.Transports	true		"body for Transports content"
-// @Success 201 {int} models.Transports
+// @Param	body		body 	models.Transport	true		"body for Transports content"
+// @Success 201 {int} models.Transport
 // @Failure 403 body is empty
 // @router / [post]
 func (c *PaymentController) Hesoyam() {
