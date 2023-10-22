@@ -2,170 +2,93 @@ package controllers
 
 import (
 	"app/src/models"
-	"encoding/json"
-	"errors"
-	"strconv"
-	"strings"
-
-	beego "github.com/beego/beego/v2/server/web"
 )
 
-// RentController operations for Rental
+// RentController operations for /Rent
 type RentController struct {
-	beego.Controller
+	controller
 }
 
-// URLMapping ...
-func (c *RentController) URLMapping() {
-	c.Mapping("Post", c.Post)
-	c.Mapping("GetOne", c.GetOne)
-	c.Mapping("GetAll", c.GetAll)
-	c.Mapping("Put", c.Put)
-	c.Mapping("Delete", c.Delete)
+// Transport
+// @Title Transport
+// @Description Получение транспорта доступного для аренды по параметрам
+// @Param	lat	query	float64	false	Географическая широта местонахождения транспорта
+// @Param	long	query	float64	false	Географическая долгота местонахождения транспорта
+// @Param	radius	query	float64	false	Радиус круга поиска транспорта
+// @Param	type	query	string	false	Тип транспорта [Car, Bike, Scooter, All]
+// @Success 201 {object} responses.TODO
+// @Failure 404 not found
+// @router /Transport [get]
+func (c *RentController) Transport() {
+
 }
 
-// Post ...
-// @Title Post
-// @Description create Rental
-// @Param	body		body 	models.Rental	true		"body for Rental content"
-// @Success 201 {int} models.Rental
-// @Failure 403 body is empty
-// @router / [post]
-func (c *RentController) Post() {
-	var v models.Rental
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if _, err := models.AddRental(&v); err == nil {
-			c.Ctx.Output.SetStatus(201)
-			c.Data["json"] = v
-		} else {
-			c.Data["json"] = err.Error()
-		}
-	} else {
-		c.Data["json"] = err.Error()
-	}
-	c.ServeJSON()
-}
-
-// GetOne ...
-// @Title Get One
-// @Description get Rental by id
-// @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Rental
-// @Failure 403 :id is empty
+// Get
+// @Title Get
+// @Description Получение информации об аренде по id
+// @Param	id	path 	int64	true	"rentId"
+// @Success 201 {object} responses.TODO
+// @Failure 401 unauthorized
+// @Failure 404 not found
 // @router /:id [get]
-func (c *RentController) GetOne() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v, err := models.GetRentalById(id)
-	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = v
-	}
-	c.ServeJSON()
+func (c *RentController) Get() {
+
 }
 
-// GetAll ...
-// @Title Get All
-// @Description get Rental
-// @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
-// @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
-// @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
-// @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
-// @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
-// @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.Rental
-// @Failure 403
-// @router / [get]
-func (c *RentController) GetAll() {
-	var fields []string
-	var sortby []string
-	var order []string
-	var query = make(map[string]string)
-	var limit int64 = 10
-	var offset int64
+// MyHistory
+// @Title MyHistory
+// @Description Получение истории аренд текущего аккаунта
+// @Success 201 {object} responses.TODO
+// @Failure 401 unauthorized
+// @router /MyHistory [get]
+func (c *RentController) MyHistory() {
 
-	// fields: col1,col2,entity.col3
-	if v := c.GetString("fields"); v != "" {
-		fields = strings.Split(v, ",")
-	}
-	// limit: 10 (default is 10)
-	if v, err := c.GetInt64("limit"); err == nil {
-		limit = v
-	}
-	// offset: 0 (default is 0)
-	if v, err := c.GetInt64("offset"); err == nil {
-		offset = v
-	}
-	// sortby: col1,col2
-	if v := c.GetString("sortby"); v != "" {
-		sortby = strings.Split(v, ",")
-	}
-	// order: desc,asc
-	if v := c.GetString("order"); v != "" {
-		order = strings.Split(v, ",")
-	}
-	// query: k:v,k:v
-	if v := c.GetString("query"); v != "" {
-		for _, cond := range strings.Split(v, ",") {
-			kv := strings.SplitN(cond, ":", 2)
-			if len(kv) != 2 {
-				c.Data["json"] = errors.New("Error: invalid query key/value pair")
-				c.ServeJSON()
-				return
-			}
-			k, v := kv[0], kv[1]
-			query[k] = v
-		}
-	}
-
-	l, err := models.GetAllRental(query, fields, sortby, order, offset, limit)
-	if err != nil {
-		c.Data["json"] = err.Error()
-	} else {
-		c.Data["json"] = l
-	}
-	c.ServeJSON()
 }
 
-// Put ...
-// @Title Put
-// @Description update the Rental
-// @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Rental	true		"body for Rental content"
-// @Success 200 {object} models.Rental
-// @Failure 403 :id is not int
-// @router /:id [put]
-func (c *RentController) Put() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	v := models.Rental{Id: id}
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &v); err == nil {
-		if err := models.UpdateRentalById(&v); err == nil {
-			c.Data["json"] = "OK"
-		} else {
-			c.Data["json"] = err.Error()
-		}
-	} else {
-		c.Data["json"] = err.Error()
-	}
-	c.ServeJSON()
+// TransportHistory
+// @Title TransportHistory
+// @Description Получение истории аренд транспорта
+// @Param	id	path 	int64	true	"transportId"
+// @Success 201 {object} responses.TODO
+// @Failure 401 unauthorized
+// @Failure 404 not found
+// @router /TransportHistory/:id [get]
+func (c *RentController) TransportHistory() {
+
 }
 
-// Delete ...
-// @Title Delete
-// @Description delete the Rental
-// @Param	id		path 	string	true		"The id you want to delete"
-// @Success 200 {string} delete success!
-// @Failure 403 id is empty
-// @router /:id [delete]
-func (c *RentController) Delete() {
-	idStr := c.Ctx.Input.Param(":id")
-	id, _ := strconv.Atoi(idStr)
-	if err := models.DeleteRental(id); err == nil {
-		c.Data["json"] = "OK"
-	} else {
-		c.Data["json"] = err.Error()
+// New
+// @Title New
+// @Description Аренда транспорта в личное пользование
+// @Param	id	path 	int64	true	"Тип аренды [Minutes, Days]"
+// @Param	rentType	query 	string	true	"transportId"
+// @Success 201 {object} responses.TODO
+// @Failure 401 unauthorized
+// @Failure 404 not found
+// @router /New/:id [post]
+func (c *RentController) New() {
+
+}
+
+// End
+// @Title End
+// @Description Завершение аренды транспорта по id аренды
+// @Param	id	path 	int64	true	"rentId"
+// @Param	lat	query	float64	false Географическая широта местонахождения транспорта
+// @Param	long	query	float64	false Географическая долгота местонахождения транспорта
+// @Success 201 {object} responses.TODO
+// @Failure 401 unauthorized
+// @Failure 404 not found
+// @router /End/:id [post]
+func (c *RentController) End() {
+
+}
+
+func (c *RentController) findModel(id int64) *models.Rent {
+	m := &models.Rent{Id: id}
+	if err := models.Get(m); err != nil {
+		c.responseError(ErrorNotFound, 404)
+		return nil
 	}
-	c.ServeJSON()
+	return m
 }

@@ -6,7 +6,7 @@ type (
 		Id          int64
 		AccountId   int64
 		CanBeRented bool
-		TypeId      int
+		Type        string
 		Model       string
 		Color       string
 		Identifier  string

@@ -2,7 +2,6 @@ package models
 
 import (
 	"errors"
-	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -10,8 +9,9 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-type Rental struct {
-	Id          int        `orm:"column(id);pk"`
+type Rent struct {
+	model
+	Id          int64      `orm:"column(id);pk"`
 	AccountId   *Account   `orm:"column(user_id);rel(fk)"`
 	TypeId      *RentTypes `orm:"column(type_id);rel(fk)"`
 	TransportId *Transport `orm:"column(transport_id);rel(fk)"`
@@ -24,39 +24,20 @@ type Rental struct {
 	UpdatedAt   time.Time  `orm:"column(updated_at);type(timestamp without time zone);auto_now_add"`
 }
 
-func (t *Rental) TableName() string {
+func (t *Rent) TableName() string {
 	return "rental"
 }
 
 func init() {
-	orm.RegisterModel(new(Rental))
+	orm.RegisterModel(new(Rent))
 }
 
-// AddRental insert a new Rental into database and returns
-// last inserted Id on success.
-func AddRental(m *Rental) (id int64, err error) {
-	o := orm.NewOrm()
-	id, err = o.Insert(m)
-	return
-}
-
-// GetRentalById retrieves Rental by Id. Returns error if
-// Id doesn't exist
-func GetRentalById(id int) (v *Rental, err error) {
-	o := orm.NewOrm()
-	v = &Rental{Id: id}
-	if err = o.Read(v); err == nil {
-		return v, nil
-	}
-	return nil, err
-}
-
-// GetAllRental retrieves all Rental matches certain condition. Returns empty list if
+// GetAllRental retrieves all Rent matches certain condition. Returns empty list if
 // no records exist
 func GetAllRental(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(Rental))
+	qs := o.QueryTable(new(Rent))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
@@ -106,7 +87,7 @@ func GetAllRental(query map[string]string, fields []string, sortby []string, ord
 		}
 	}
 
-	var l []Rental
+	var l []Rent
 	qs = qs.OrderBy(sortFields...)
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -127,34 +108,4 @@ func GetAllRental(query map[string]string, fields []string, sortby []string, ord
 		return ml, nil
 	}
 	return nil, err
-}
-
-// UpdateRental updates Rental by Id and returns error if
-// the record to be updated doesn't exist
-func UpdateRentalById(m *Rental) (err error) {
-	o := orm.NewOrm()
-	v := Rental{Id: m.Id}
-	// ascertain id exists in the database
-	if err = o.Read(&v); err == nil {
-		var num int64
-		if num, err = o.Update(m); err == nil {
-			fmt.Println("Number of records updated in database:", num)
-		}
-	}
-	return
-}
-
-// DeleteRental deletes Rental by Id and returns error if
-// the record to be deleted doesn't exist
-func DeleteRental(id int) (err error) {
-	o := orm.NewOrm()
-	v := Rental{Id: id}
-	// ascertain id exists in the database
-	if err = o.Read(&v); err == nil {
-		var num int64
-		if num, err = o.Delete(&Rental{Id: id}); err == nil {
-			fmt.Println("Number of records deleted in database:", num)
-		}
-	}
-	return
 }
