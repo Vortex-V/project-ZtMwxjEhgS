@@ -1,14 +1,21 @@
 package responses
 
-type AccountSignUpResponse struct {
-	response
-	Id       int64
-	Username string
-}
+import "app/src/models"
 
-type AccountMeResponse struct {
-	response
-	Id       int64
-	Username string
-	Balance  float64
-}
+type (
+	AccountSignUpResponse struct {
+		response
+		Id       int64
+		Username string
+	}
+	AccountMeResponse struct {
+		response
+		Id       int64
+		Username string
+		Balance  float64
+	}
+	AdminAccountResponseCollection struct {
+		response
+		Accounts []models.Account
+	}
+)

@@ -16,10 +16,10 @@ type AdminAccountController struct {
 // @Security	api_key
 // @Param	start	query	int	false	Начало выборки
 // @Param	count	query	int	false	Размер выборки
-// @Success	200	{object}
+// @Success	200	{object}	responses.AdminAccountResponseCollection	Указанный объект может быть получен по ключу data
 // @Failure 401	unauthorized
 // @router /GetAll [get]
-func (c AdminAccountController) GetAll() {
+func (c *AdminAccountController) GetAll() {
 
 }
 
@@ -32,7 +32,7 @@ func (c AdminAccountController) GetAll() {
 // @Failure 401	unauthorized
 // @Failure 404 not found
 // @router /:id [get]
-func (c AdminAccountController) Get() {
+func (c *AdminAccountController) Get() {
 
 }
 
@@ -45,7 +45,7 @@ func (c AdminAccountController) Get() {
 // @Failure 400 body is invalid
 // @Failure 401	unauthorized
 // @router / [post]
-func (c AdminAccountController) Post() {
+func (c *AdminAccountController) Post() {
 
 }
 
@@ -60,7 +60,7 @@ func (c AdminAccountController) Post() {
 // @Failure 401	unauthorized
 // @Failure 404 not found
 // @router /:id [put]
-func (c AdminAccountController) Put() {
+func (c *AdminAccountController) Put() {
 
 }
 
@@ -73,7 +73,7 @@ func (c AdminAccountController) Put() {
 // @Failure 401	unauthorized
 // @Failure 404 not found
 // @router /:id [delete]
-func (c AdminAccountController) Delete() {
+func (c *AdminAccountController) Delete() {
 
 }
 

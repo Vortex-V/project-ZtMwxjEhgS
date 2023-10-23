@@ -28,6 +28,7 @@ func (c *AdminTransportController) GetAll() {
 // Get
 // @Title Get
 // @Description Получение информации о транспортном средстве по id
+// @Security	api_key
 // @Param	id	path 	int64	true	"id"
 // @Success 200 {object} models.Transport	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty

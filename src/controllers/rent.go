@@ -26,6 +26,7 @@ func (c *RentController) Transport() {
 // Get
 // @Title Get
 // @Description Получение информации об аренде по id
+// @Security	api_key
 // @Param	rentId	path 	int64	true	rentId
 // @Success 201 {object} responses.RentGetResponse
 // @Failure 401 unauthorized
@@ -38,6 +39,7 @@ func (c *RentController) Get() {
 // MyHistory
 // @Title MyHistory
 // @Description Получение истории аренд текущего аккаунта
+// @Security	api_key
 // @Success 201 {object} responses.RentHistoryResponseCollection
 // @Failure 401 unauthorized
 // @router /MyHistory [get]
@@ -48,6 +50,7 @@ func (c *RentController) MyHistory() {
 // TransportHistory
 // @Title TransportHistory
 // @Description Получение истории аренд транспорта
+// @Security	api_key
 // @Param	transportId	path 	int64	true	transportId
 // @Success 201 {object} responses.RentHistoryResponseCollection
 // @Failure 401 unauthorized
@@ -60,6 +63,7 @@ func (c *RentController) TransportHistory() {
 // New
 // @Title New
 // @Description Аренда транспорта в личное пользование
+// @Security	api_key
 // @Param	transportId	path 	int64	true	transportId
 // @Param	rentType	query 	string	true	Тип аренды [Minutes, Days]
 // @Success 201 {object} responses.RentGetResponse
@@ -73,10 +77,11 @@ func (c *RentController) New() {
 // End
 // @Title End
 // @Description Завершение аренды транспорта по id аренды
+// @Security	api_key
 // @Param	rentId	path 	int64	true	rentId
 // @Param	lat	query	float64	false Географическая широта местонахождения транспорта
 // @Param	long	query	float64	false Географическая долгота местонахождения транспорта
-// @Success 201 {object}
+// @Success 201
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
