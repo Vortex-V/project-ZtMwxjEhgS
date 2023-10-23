@@ -1,4 +1,4 @@
-package routers
+package routeHelpers
 
 import (
 	"app/src/models"
@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func authFilter(ctx *context.Context) {
+func AuthFilter(ctx *context.Context) {
 	authHeader := ctx.Input.Header("Authorization")
 	if authHeader == "" {
 		ctx.Output.SetStatus(401)
