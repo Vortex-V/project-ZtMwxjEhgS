@@ -19,7 +19,7 @@ type (
 		DayPrice    float64
 	}
 
-	AdminTransportResponseCollection struct {
-		Transports []models.Transport
+	AdminTransportResponseCollection struct { // TODO убрать
+		List []models.Transport
 	}
 )

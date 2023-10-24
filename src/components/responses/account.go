@@ -1,7 +1,5 @@
 package responses
 
-import "app/src/models"
-
 type (
 	AccountSignUpResponse struct {
 		response
@@ -14,8 +12,13 @@ type (
 		Username string
 		Balance  float64
 	}
-	AdminAccountResponseCollection struct {
+	AdminAccountResponse struct {
 		response
-		Accounts []models.Account
+		Id       int64
+		Username string
+		Password string
+		Type     int
+		Status   int
+		Balance  float64
 	}
 )

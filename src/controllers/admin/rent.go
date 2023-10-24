@@ -29,7 +29,7 @@ func (c *AdminRentController) Get() {
 // @Description Получение истории аренд пользователя с id={userId}
 // @Security	api_key
 // @Param	userId	path 	int64	true	userId
-// @Success 200 {object} responses.RentHistoryResponseCollection
+// @Success 200 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
@@ -43,7 +43,7 @@ func (c *AdminRentController) UserHistory() {
 // @Description Получение истории аренд транспорта с id={transportId}
 // @Security	api_key
 // @Param	transportId	path 	int64	true	transportId
-// @Success 200 {object} responses.RentHistoryResponseCollection
+// @Success 200 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found

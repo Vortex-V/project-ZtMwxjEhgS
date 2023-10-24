@@ -90,6 +90,33 @@ paths:
       security:
       - api_key: []
   /Admin/Account/:
+    get:
+      tags:
+      - Admin/Account
+      description: |-
+        Получение списка всех аккаунтов
+        <br>
+      operationId: AdminAccountController.GetAll
+      parameters:
+      - in: query
+        name: start
+        description: "false"
+        type: integer
+        format: int64
+      - in: query
+        name: count
+        description: "false"
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: Список из указанных объектов может быть получен по ключу data
+          schema:
+            $ref: '#/definitions/models.Account'
+        "401":
+          description: unauthorized
+      security:
+      - api_key: []
     post:
       tags:
       - Admin/Account
@@ -193,36 +220,6 @@ paths:
           description: unauthorized
         "404":
           description: not found
-      security:
-      - api_key: []
-  /Admin/Account/GetAll:
-    get:
-      tags:
-      - Admin/Account
-      description: |-
-        Получение списка всех аккаунтов
-        <br>
-      operationId: AdminAccountController.GetAll
-      parameters:
-      - in: query
-        name: start
-        description: выборки
-        type: integer
-        format: int64
-        default: "false"
-      - in: query
-        name: count
-        description: выборки
-        type: integer
-        format: int64
-        default: "false"
-      responses:
-        "200":
-          description: Указанный объект может быть получен по ключу data
-          schema:
-            $ref: '#/definitions/responses.AdminAccountResponseCollection'
-        "401":
-          description: unauthorized
       security:
       - api_key: []
   /Admin/Rent/Rent:
@@ -357,9 +354,9 @@ paths:
         format: int64
       responses:
         "200":
-          description: ""
+          description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentHistoryResponseCollection'
+            $ref: '#/definitions/responses.RentGetResponse'
         "400":
           description: :id is empty
         "401":
@@ -385,9 +382,9 @@ paths:
         format: int64
       responses:
         "200":
-          description: ""
+          description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentHistoryResponseCollection'
+            $ref: '#/definitions/responses.RentGetResponse'
         "400":
           description: :id is empty
         "401":
@@ -637,9 +634,9 @@ paths:
       operationId: RentController.MyHistory
       responses:
         "201":
-          description: ""
+          description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentHistoryResponseCollection'
+            $ref: '#/definitions/responses.RentGetResponse'
         "401":
           description: unauthorized
       security:
@@ -726,9 +723,9 @@ paths:
         format: int64
       responses:
         "201":
-          description: ""
+          description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentHistoryResponseCollection'
+            $ref: '#/definitions/responses.RentGetResponse'
         "401":
           description: unauthorized
         "404":
@@ -1148,19 +1145,11 @@ definitions:
         format: int64
       Username:
         type: string
-  responses.AdminAccountResponseCollection:
-    title: AdminAccountResponseCollection
-    type: object
-    properties:
-      Accounts:
-        type: array
-        items:
-          $ref: '#/definitions/models.Account'
   responses.AdminTransportResponseCollection:
     title: AdminTransportResponseCollection
     type: object
     properties:
-      Transports:
+      List:
         type: array
         items:
           $ref: '#/definitions/models.Transport'
@@ -1194,14 +1183,6 @@ definitions:
         format: int64
       Type:
         type: string
-  responses.RentHistoryResponseCollection:
-    title: RentHistoryResponseCollection
-    type: object
-    properties:
-      Rents:
-        type: array
-        items:
-          $ref: '#/definitions/responses.RentGetResponse'
   responses.RentTransportResponse:
     title: RentTransportResponse
     type: object

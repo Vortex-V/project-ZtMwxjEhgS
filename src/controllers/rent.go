@@ -40,7 +40,7 @@ func (c *RentController) Get() {
 // @Title MyHistory
 // @Description Получение истории аренд текущего аккаунта
 // @Security	api_key
-// @Success 201 {object} responses.RentHistoryResponseCollection
+// @Success 201 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure 401 unauthorized
 // @router /MyHistory [get]
 func (c *RentController) MyHistory() {
@@ -52,7 +52,7 @@ func (c *RentController) MyHistory() {
 // @Description Получение истории аренд транспорта
 // @Security	api_key
 // @Param	transportId	path 	int64	true	transportId
-// @Success 201 {object} responses.RentHistoryResponseCollection
+// @Success 201 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /TransportHistory/:transportId [get]

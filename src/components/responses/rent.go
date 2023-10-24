@@ -36,8 +36,4 @@ type (
 		FinalPrice  float64
 		Status      int
 	}
-	RentHistoryResponseCollection struct {
-		response
-		Rents []RentGetResponse
-	}
 )

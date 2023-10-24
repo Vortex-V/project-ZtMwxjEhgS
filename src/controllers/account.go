@@ -39,7 +39,7 @@ func (c *AccountController) Me() {
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountSignInRequest
-	if !c.Load(&data) {
+	if !c.LoadAndValidate(&data) {
 		return
 	}
 
@@ -53,7 +53,7 @@ func (c *AccountController) SignIn() {
 		return
 	}
 
-	c.Response(DataMap{"token": token})
+	c.ResponseJson(DataMap{"token": token})
 }
 
 // SignUp
@@ -64,7 +64,7 @@ func (c *AccountController) SignIn() {
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountSingUpRequest
-	if !c.Load(&data) {
+	if !c.LoadAndValidate(&data) {
 		return
 	}
 
@@ -103,7 +103,7 @@ func (c *AccountController) SignOut() {
 		return
 	}
 
-	c.Response(DataMap{"message": "Выполнен выход из аккаунта"})
+	c.ResponseJson(DataMap{"message": "Выполнен выход из аккаунта"})
 }
 
 // Update
@@ -121,7 +121,7 @@ func (c *AccountController) Update() {
 		return
 	}
 	var data requests.AccountUpdateRequest
-	if !c.Load(&data) {
+	if !c.LoadAndValidate(&data) {
 		return
 	}
 
@@ -142,7 +142,7 @@ func (c *AccountController) Update() {
 		return
 	}
 
-	c.Response(DataMap{"message": "Данные успешно изменены"})
+	c.ResponseJson(DataMap{"message": "Данные успешно изменены"})
 }
 
 func (c *AccountController) findModel(id int64) *models.Account {

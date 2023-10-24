@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"app/src/components/requests"
+	"app/src/components/responses"
 	"app/src/controllers"
 	"app/src/models"
 )
@@ -14,13 +16,27 @@ type AdminAccountController struct {
 // @Title GetAll
 // @Description	Получение списка всех аккаунтов
 // @Security	api_key
-// @Param	start	query	int	false	Начало выборки
-// @Param	count	query	int	false	Размер выборки
-// @Success	200	{object}	responses.AdminAccountResponseCollection	Указанный объект может быть получен по ключу data
+// @Param	start	query	int	Начало выборки	false	0
+// @Param	count	query	int	Размер выборки (по умолчанию 10)	false	10
+// @Success	200	{object}	models.Account	Список из указанных объектов может быть получен по ключу data
 // @Failure 401	unauthorized
-// @router /GetAll [get]
+// @router / [get]
 func (c *AdminAccountController) GetAll() {
+	start, _ := c.GetInt("start", 1)
+	count, _ := c.GetInt("count", 10)
+	query := models.Find(new(models.Account)).
+		Offset(start - 1).
+		Limit(count)
+	collection := make([]responses.AdminAccountResponse, 0)
+	rowCount, err := models.Raw(query).QueryRows(&collection)
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
 
+	c.Response(collection, controllers.DataMap{
+		"count": rowCount,
+	})
 }
 
 // Get
@@ -28,12 +44,19 @@ func (c *AdminAccountController) GetAll() {
 // @Description	Получение информации об аккаунте по id
 // @Security	api_key
 // @Param	id	path 	int64	true	"id"
-// @Success	200	{object}	models.Account	Указанный объект может быть получен по ключу data
+// @Success	200	{object}	responses.AdminAccountResponse	Указанный объект может быть получен по ключу data
+// @Failure	400	:id is empty
 // @Failure 401	unauthorized
 // @Failure 404 not found
 // @router /:id [get]
 func (c *AdminAccountController) Get() {
-
+	id, _ := c.GetInt64(":id", 0)
+	if id == 0 {
+		c.ResponseError(controllers.ErrorBadRequest, 400)
+		return
+	}
+	account := c.findModel(id)
+	c.ResponseMapTo(new(responses.AdminAccountResponse), account)
 }
 
 // Post
@@ -46,7 +69,20 @@ func (c *AdminAccountController) Get() {
 // @Failure 401	unauthorized
 // @router / [post]
 func (c *AdminAccountController) Post() {
+	var data requests.AdminAccountWriteRequest
+	if !c.LoadAndValidate(&data) {
+		return
+	}
 
+	account := new(models.Account)
+	account.Load(data)
+	_, err := models.Insert(account)
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	c.ResponseJson(account, "Аккаунт успешно создан")
 }
 
 // Put
@@ -56,6 +92,7 @@ func (c *AdminAccountController) Post() {
 // @Param	id	path 	int64	true	"id"
 // @Param	body	body	requests.AdminAccountWriteRequest	"account info"
 // @Success	200	{object}	models.Account	Указанный объект может быть получен по ключу data
+// @Failure	400	:id is empty
 // @Failure 400 body is invalid
 // @Failure 401	unauthorized
 // @Failure 404 not found
@@ -70,6 +107,7 @@ func (c *AdminAccountController) Put() {
 // @Security	api_key
 // @Param	id	path 	int64	true	"id"
 // @Success	200	{"message": "string"}
+// @Failure	400	:id is empty
 // @Failure 401	unauthorized
 // @Failure 404 not found
 // @router /:id [delete]

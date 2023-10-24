@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -40,6 +41,11 @@ type Model interface {
 type model struct{}
 
 func (m *model) implement(_ Model) {}
+
+func (m *model) Load(data interface{}) {
+	bytes, _ := json.Marshal(data)
+	_ = json.Unmarshal(bytes, m)
+}
 
 // Функции Get, Insert, Update, Delete, Exists
 // позволяют однозначно определить,

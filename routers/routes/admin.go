@@ -9,7 +9,7 @@ import (
 func Admin() *web.Namespace {
 
 	ns := web.NewNamespace("/Admin").
-		Filter("before", routeHelpers.AuthFilter).
+		Filter("before", routeHelpers.AuthFilter). // TODO фильтр админа
 		Namespace(AdminAccount()).
 		Namespace(AdminTransport())
 	AdminRent(ns)
