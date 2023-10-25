@@ -12,7 +12,7 @@ type Account struct {
 	Id            int64     `orm:"column(id);auto;pk"`
 	Username      string    `orm:"column(username);unique"`
 	Password      string    `orm:"column(password)"`
-	Type          int       `orm:"column(type);" default:"1"`
+	Type          int       `orm:"column(type);" default:"2"`
 	Status        int       `orm:"column(status)" default:"1"`
 	IsNeedRelogin bool      `orm:"column(is_need_relogin);" default:"false"`
 	Balance       float64   `orm:"column(balance);default(0)"`
@@ -26,6 +26,50 @@ func (m *Account) TableName() string {
 
 func init() {
 	orm.RegisterModel(new(Account))
+}
+
+const (
+	AccountTypeAdmin = iota + 1
+	AccountTypeUser
+)
+
+var typeLabels = map[int]string{
+	AccountTypeAdmin: "admin",
+	AccountTypeUser:  "user",
+}
+
+func (m *Account) GetTypeLabel() string {
+	return typeLabels[m.Type]
+}
+
+func GetAccountTypeLabelByKey(key int) string {
+	return typeLabels[key]
+}
+
+func (m *Account) GetTypeByLabel(label string) int {
+	for k, v := range typeLabels {
+		if v == label {
+			return k
+		}
+	}
+	return AccountTypeUser
+}
+
+func (m *Account) IsAdmin() bool {
+	return m.Type == AccountTypeAdmin
+}
+
+const (
+	AccountStatusActive = iota + 1
+	AccountStatusDeleted
+)
+
+func (m *Account) GetStatusLabel(key int) string {
+	types := map[int]string{
+		AccountStatusActive:  "Active",
+		AccountStatusDeleted: "Deleted",
+	}
+	return types[key]
 }
 
 func (m *Account) Login(password string) (string, error) {
@@ -50,6 +94,7 @@ func (m *Account) Login(password string) (string, error) {
 	return token, nil
 }
 
+// TODO сделать нормальный Create и перенести код из контроллеров
 func (m *Account) Register(username, password string) error {
 	password, err := auth.HashPassword(password)
 	if err != nil {
@@ -57,6 +102,8 @@ func (m *Account) Register(username, password string) error {
 	}
 	m.Username = username
 	m.Password = password
+	m.Type = AccountTypeUser
+	m.Status = AccountStatusActive
 	_, err = Insert(m)
 	return err
 }

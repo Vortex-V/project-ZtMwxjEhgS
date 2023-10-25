@@ -100,14 +100,16 @@ paths:
       parameters:
       - in: query
         name: start
-        description: "false"
+        description: Начало выборки [применяет offset(start*count)]
         type: integer
         format: int64
+        default: "1"
       - in: query
         name: count
-        description: "false"
+        description: Размер выборки (по умолчанию 10)
         type: integer
         format: int64
+        default: "10"
       responses:
         "200":
           description: Список из указанных объектов может быть получен по ключу data
@@ -160,7 +162,9 @@ paths:
         "200":
           description: Указанный объект может быть получен по ключу data
           schema:
-            $ref: '#/definitions/models.Account'
+            $ref: '#/definitions/responses.AdminAccountResponse'
+        "400":
+          description: :id is empty
         "401":
           description: unauthorized
         "404":
@@ -183,14 +187,14 @@ paths:
         format: int64
       - in: body
         name: body
-        description: account info
+        description: info
         schema:
           $ref: '#/definitions/requests.AdminAccountWriteRequest'
       responses:
         "200":
           description: Указанный объект может быть получен по ключу data
           schema:
-            $ref: '#/definitions/models.Account'
+            $ref: '#/definitions/responses.AdminAccountResponse'
         "400":
           description: body is invalid
         "401":
@@ -216,6 +220,8 @@ paths:
       responses:
         "200":
           description: '{"message": "string"}'
+        "400":
+          description: :id is empty
         "401":
           description: unauthorized
         "404":
@@ -1143,6 +1149,22 @@ definitions:
       Id:
         type: integer
         format: int64
+      Username:
+        type: string
+  responses.AdminAccountResponse:
+    title: AdminAccountResponse
+    type: object
+    properties:
+      Balance:
+        type: number
+        format: double
+      Id:
+        type: integer
+        format: int64
+      Password:
+        type: string
+      Type:
+        type: string
       Username:
         type: string
   responses.AdminTransportResponseCollection:

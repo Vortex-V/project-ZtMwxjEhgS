@@ -46,3 +46,15 @@ func AuthFilter(ctx *context.Context) {
 		ctx.Input.SetParam("accountId", strconv.FormatInt(id, 10))
 	}
 }
+
+func AdminFilter(ctx *context.Context) {
+	accountId := ctx.Input.Param("accountId")
+	model := new(models.Account)
+	query := models.Find(model, "type").Where("id = ?")
+	models.Raw(query, accountId).QueryRow(model)
+	if !model.IsAdmin() {
+		ctx.Output.SetStatus(404)
+		ctx.Output.Body([]byte("Not found"))
+		return
+	}
+}

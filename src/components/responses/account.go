@@ -17,8 +17,7 @@ type (
 		Id       int64
 		Username string
 		Password string
-		Type     int
-		Status   int
+		Type     string
 		Balance  float64
 	}
 )

@@ -157,16 +157,18 @@
                     {
                         "in": "query",
                         "name": "start",
-                        "description": "false",
+                        "description": "Начало выборки [применяет offset(start*count)]",
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "default": "1"
                     },
                     {
                         "in": "query",
                         "name": "count",
-                        "description": "false",
+                        "description": "Размер выборки (по умолчанию 10)",
                         "type": "integer",
-                        "format": "int64"
+                        "format": "int64",
+                        "default": "10"
                     }
                 ],
                 "responses": {
@@ -244,8 +246,11 @@
                     "200": {
                         "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/models.Account"
+                            "$ref": "#/definitions/responses.AdminAccountResponse"
                         }
+                    },
+                    "400": {
+                        "description": ":id is empty"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -278,7 +283,7 @@
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "account info",
+                        "description": "info",
                         "schema": {
                             "$ref": "#/definitions/requests.AdminAccountWriteRequest"
                         }
@@ -288,7 +293,7 @@
                     "200": {
                         "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/models.Account"
+                            "$ref": "#/definitions/responses.AdminAccountResponse"
                         }
                     },
                     "400": {
@@ -326,6 +331,9 @@
                 "responses": {
                     "200": {
                         "description": "{\"message\": \"string\"}"
+                    },
+                    "400": {
+                        "description": ":id is empty"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -1669,6 +1677,29 @@
                 "Id": {
                     "type": "integer",
                     "format": "int64"
+                },
+                "Username": {
+                    "type": "string"
+                }
+            }
+        },
+        "responses.AdminAccountResponse": {
+            "title": "AdminAccountResponse",
+            "type": "object",
+            "properties": {
+                "Balance": {
+                    "type": "number",
+                    "format": "double"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Password": {
+                    "type": "string"
+                },
+                "Type": {
+                    "type": "string"
                 },
                 "Username": {
                     "type": "string"

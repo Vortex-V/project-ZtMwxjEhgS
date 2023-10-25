@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/beego/beego/v2/core/validation"
 	"github.com/beego/beego/v2/server/web"
+	"reflect"
 )
 
 var (
@@ -44,6 +45,10 @@ func (c *Controller) Response(args ...interface{}) {
 	)
 	for _, arg := range args {
 		switch v := arg.(type) {
+		case int:
+			status = v
+		case string:
+			responseData["message"] = v
 		case DataMap:
 			for key, value := range v {
 				responseData[key] = value
@@ -55,17 +60,16 @@ func (c *Controller) Response(args ...interface{}) {
 				continue
 			}
 			responseData["data"] = data
-		case []responses.Response:
-			data, err := toCollection(v)
-			if err != nil {
-				responseData["error"] = err.Error()
-				continue
-			}
-			responseData["data"] = data
-		case int:
-			status = v
 		default:
-
+			rValType := reflect.TypeOf(v)
+			if rValType.Kind() == reflect.Slice {
+				data, err := toCollection(v)
+				if err != nil {
+					responseData["error"] = err.Error()
+					continue
+				}
+				responseData["data"] = data
+			}
 		}
 	}
 

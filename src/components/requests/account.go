@@ -45,6 +45,6 @@ type (
 		Username string `valid:"Required"`
 		Password string `valid:"Required"`
 		IsAdmin  bool
-		Balance  float64
+		Balance  float64 `valid:"Required"`
 	}
 )
