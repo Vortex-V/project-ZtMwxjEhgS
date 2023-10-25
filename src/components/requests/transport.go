@@ -2,8 +2,16 @@ package requests
 
 type (
 	TransportPostRequest struct {
-		TransportPutRequest
+		CanBeRented   bool   `valid:"Required"`
 		TransportType string `valid:"Required"`
+		Model         string `valid:"Required"`
+		Color         string `valid:"Required"`
+		Identifier    string `valid:"Required"`
+		Description   string
+		Latitude      float64 `valid:"Required"`
+		Longitude     float64 `valid:"Required"`
+		MinutePrice   float64
+		DayPrice      float64
 	}
 
 	TransportPutRequest struct {
