@@ -34,12 +34,17 @@ func (c *AdminTransportController) GetAll() {
 		query.Where("transport_type = ?")
 		rawSetter = models.Raw(query).SetArgs(transportType)
 	}
-	collection := make([]responses.TransportResponse, 0)
-	rowCount, err := rawSetter.QueryRows(&collection)
+	list := make([]*models.Transport, 0)
+	rowCount, err := rawSetter.QueryRows(&list)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
+
+	collection := responses.Collection[*responses.TransportResponse, *models.Transport](
+		new(responses.TransportResponse),
+		list,
+		false)
 
 	c.Response(collection, controllers.DataMap{
 		"count": rowCount,
@@ -62,21 +67,11 @@ func (c *AdminTransportController) Get() {
 		return
 	}
 	transport := c.findModel(id)
-	// TODO доработать responses.MapTo, чтобы так не писать
-	response := &responses.TransportResponse{
-		Id:            transport.Id,
-		OwnerId:       transport.AccountId.Id,
-		CanBeRented:   transport.CanBeRented,
-		TransportType: transport.Type,
-		Model:         transport.Model,
-		Color:         transport.Color,
-		Identifier:    transport.Identifier,
-		Description:   transport.Description,
-		Latitude:      transport.Latitude,
-		Longitude:     transport.Longitude,
-		MinutePrice:   transport.MinutePrice,
-		DayPrice:      transport.DayPrice,
-	}
+
+	response := responses.New[*responses.TransportResponse](
+		new(responses.TransportResponse),
+		transport,
+		false)
 	c.Response(response)
 }
 
@@ -96,7 +91,7 @@ func (c *AdminTransportController) Post() {
 	}
 
 	transport := &models.Transport{
-		AccountId:   &models.Account{Id: data.OwnerId},
+		Account:     &models.Account{Id: data.OwnerId},
 		CanBeRented: data.CanBeRented,
 		Type:        data.TransportType,
 		Model:       data.Model,
@@ -114,20 +109,10 @@ func (c *AdminTransportController) Post() {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
-	response := &responses.TransportResponse{
-		Id:            transport.Id,
-		OwnerId:       transport.AccountId.Id,
-		CanBeRented:   transport.CanBeRented,
-		TransportType: transport.Type,
-		Model:         transport.Model,
-		Color:         transport.Color,
-		Identifier:    transport.Identifier,
-		Description:   transport.Description,
-		Latitude:      transport.Latitude,
-		Longitude:     transport.Longitude,
-		MinutePrice:   transport.MinutePrice,
-		DayPrice:      transport.DayPrice,
-	}
+	response := responses.New[*responses.TransportResponse](
+		new(responses.TransportResponse),
+		transport,
+		false)
 	c.Response(response, "Транспорт добавлен")
 }
 
@@ -157,7 +142,7 @@ func (c *AdminTransportController) Put() {
 
 	transport := &models.Transport{
 		Id:          id,
-		AccountId:   &models.Account{Id: data.OwnerId},
+		Account:     &models.Account{Id: data.OwnerId},
 		CanBeRented: data.CanBeRented,
 		Type:        data.TransportType,
 		Model:       data.Model,
@@ -175,20 +160,10 @@ func (c *AdminTransportController) Put() {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
-	response := &responses.TransportResponse{
-		Id:            transport.Id,
-		OwnerId:       transport.AccountId.Id,
-		CanBeRented:   transport.CanBeRented,
-		TransportType: transport.Type,
-		Model:         transport.Model,
-		Color:         transport.Color,
-		Identifier:    transport.Identifier,
-		Description:   transport.Description,
-		Latitude:      transport.Latitude,
-		Longitude:     transport.Longitude,
-		MinutePrice:   transport.MinutePrice,
-		DayPrice:      transport.DayPrice,
-	}
+	response := responses.New[*responses.TransportResponse](
+		new(responses.TransportResponse),
+		transport,
+		false)
 	c.Response(response, "Данные обновлены")
 }
 

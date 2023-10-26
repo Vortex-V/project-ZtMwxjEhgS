@@ -13,6 +13,8 @@ var (
 	qb orm.QueryBuilder
 )
 
+// Init
+// Должен выполняться после регистрации всех моделей
 func init() {
 	var dbConf, _ = web.AppConfig.GetSection("database")
 	cfg := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",

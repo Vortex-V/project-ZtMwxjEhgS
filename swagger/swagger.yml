@@ -100,7 +100,7 @@ paths:
       parameters:
       - in: query
         name: start
-        description: Начало выборки [применяет offset(start*count)]
+        description: Начало выборки [применяет offset((start - 1) * count)]
         type: integer
         format: int64
         default: "1"
@@ -154,7 +154,7 @@ paths:
       parameters:
       - in: path
         name: id
-        description: id
+        description: accountId
         required: true
         type: integer
         format: int64
@@ -187,7 +187,7 @@ paths:
         format: int64
       - in: body
         name: body
-        description: info
+        description: account info
         schema:
           $ref: '#/definitions/requests.AdminAccountWriteRequest'
       responses:
@@ -408,33 +408,28 @@ paths:
         <br>
       operationId: AdminTransportController.GetAll
       parameters:
-      - in: path
-        name: id
-        description: id
-        required: true
-        type: integer
-        format: int64
       - in: query
         name: start
-        description: выборки
+        description: Начало выборки [применяет offset((start - 1) * count)]
         type: integer
         format: int64
-        default: "false"
+        default: "1"
       - in: query
         name: count
-        description: выборки
+        description: Размер выборки (по умолчанию 10)
         type: integer
         format: int64
-        default: "false"
+        default: "10"
       - in: query
         name: transportType
-        description: "false"
+        description: Тип транспорта [Car, Bike, Scooter, All]
         type: string
+        default: All
       responses:
         "200":
-          description: Указанный объект может быть получен по ключу data
+          description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.AdminTransportResponseCollection'
+            $ref: '#/definitions/responses.TransportResponse'
         "401":
           description: unauthorized
       security:
@@ -474,15 +469,15 @@ paths:
       parameters:
       - in: path
         name: id
-        description: id
+        description: transportId
         required: true
         type: integer
         format: int64
       responses:
         "200":
-          description: Указанный объект может быть получен по ключу data
+          description: '"Указанный объект может быть получен по ключу data"'
           schema:
-            $ref: '#/definitions/models.Transport'
+            $ref: '#/definitions/responses.TransportResponse'
         "400":
           description: :id is empty
         "401":
@@ -512,7 +507,7 @@ paths:
         "200":
           description: Указанный объект может быть получен по ключу data
           schema:
-            $ref: '#/definitions/models.Transport'
+            $ref: '#/definitions/responses.TransportResponse'
         "400":
           description: body is invalid
         "401":
@@ -957,23 +952,11 @@ definitions:
         format: double
       Model:
         type: string
-      TypeId:
-        $ref: '#/definitions/models.TransportTypes'
+      Type:
+        type: string
       UpdatedAt:
         type: string
         format: datetime
-  models.TransportTypes:
-    title: TransportTypes
-    type: object
-    properties:
-      Id:
-        type: integer
-        format: int64
-      Status:
-        type: integer
-        format: int64
-      Title:
-        type: string
   models.model:
     title: model
     type: object
@@ -1167,14 +1150,6 @@ definitions:
         type: string
       Username:
         type: string
-  responses.AdminTransportResponseCollection:
-    title: AdminTransportResponseCollection
-    type: object
-    properties:
-      List:
-        type: array
-        items:
-          $ref: '#/definitions/models.Transport'
   responses.RentGetResponse:
     title: RentGetResponse
     type: object
@@ -1249,9 +1224,6 @@ definitions:
     title: TransportResponse
     type: object
     properties:
-      AccountId:
-        type: integer
-        format: int64
       CanBeRented:
         type: boolean
       Color:
@@ -1277,7 +1249,10 @@ definitions:
         format: double
       Model:
         type: string
-      Type:
+      OwnerId:
+        type: integer
+        format: int64
+      TransportType:
         type: string
   responses.response:
     title: response
