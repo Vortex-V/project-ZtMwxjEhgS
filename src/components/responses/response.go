@@ -2,7 +2,6 @@ package responses
 
 import (
 	"app/src/models"
-	"encoding/json"
 	"reflect"
 )
 
@@ -24,7 +23,7 @@ func (r *response) implement(_ Response) {}
 
 type ResponseConstructable interface {
 	Response
-	CustomFields(m models.Model) interface{}
+	Construct(m models.Model) interface{}
 }
 
 // MapTo
@@ -35,15 +34,7 @@ func MapTo(r Response, m models.Model) map[string]interface{} {
 	rResponse := reflect.ValueOf(r).Elem()
 	rResponseType := rResponse.Type()
 
-	// Проходит по полям модели и записывает их в структуру ответа, если это возможно
-	// По сути отфильтровывает поля модели, которые не нужно отдавать в ответе
-	for i := 0; i < rValue.NumField(); i++ {
-		valueField := rValue.Field(i)
-		responseField := rResponse.FieldByName(rValueType.Field(i).Name)
-		if responseField.CanSet() {
-			responseField.Set(valueField)
-		}
-	}
+	setFields(rValueType, rValue, rResponse)
 
 	var data = make(map[string]interface{})
 	for i := 0; i < rResponse.NumField(); i++ {
@@ -56,21 +47,17 @@ func MapTo(r Response, m models.Model) map[string]interface{} {
 	return data
 }
 
-func New[rT ResponseConstructable](r rT, m models.Model, onlyCustomFields bool) rT {
-	rtResponse := reflect.ValueOf(r).Elem()
-
-	if !onlyCustomFields {
+func New[rT Response](r Response, m models.Model) rT {
+	if rConstruct, ok := r.(ResponseConstructable); ok {
+		r = rConstruct.Construct(m).(rT)
+	} else {
+		rtResponse := reflect.ValueOf(r).Elem()
 		rtModel := reflect.ValueOf(m).Elem()
 		rtModelT := rtModel.Type()
 		setFields(rtModelT, rtModel, rtResponse)
 	}
 
-	customFields := r.CustomFields(m)
-	rtCustomFields := reflect.ValueOf(customFields)
-	rtCustomFieldsT := rtCustomFields.Type()
-	setFields(rtCustomFieldsT, rtCustomFields, rtResponse)
-
-	return r
+	return r.(rT)
 }
 
 func setFields(rtSrcType reflect.Type, rtSrc, rtDst reflect.Value) {
@@ -83,18 +70,11 @@ func setFields(rtSrcType reflect.Type, rtSrc, rtDst reflect.Value) {
 	}
 }
 
-func Collection[rT ResponseConstructable, mT models.Model](r rT, models []mT, onlyCustomFields bool) []rT {
+func Collection[rT Response, mT models.Model](r rT, models []mT) []rT {
 	var collection = make([]rT, 0, len(models))
 	for _, v := range models {
-		newR := clone[rT](r)
-		collection = append(collection, New[rT](newR, v, onlyCustomFields))
+		collection = append(collection, New[rT](r, v))
 	}
 
 	return collection
-}
-
-func clone[T any](el T) (newEl T) {
-	tmpStr, _ := json.Marshal(el)
-	_ = json.Unmarshal(tmpStr, &newEl)
-	return
 }

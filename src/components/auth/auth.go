@@ -15,7 +15,7 @@ var (
 func CreateAccessToken(id int64) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["id"] = id
-	claims["exp"] = time.Now().Add(time.Hour * 2).Unix()
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	jwtKey, _ := web.AppConfig.String("jwt")
 	jwtToken, err := token.SignedString([]byte(jwtKey))

@@ -26,25 +26,17 @@ func (c *AdminTransportController) GetAll() {
 	start, _ := c.GetInt("start", 1)
 	count, _ := c.GetInt("count", 10)
 	transportType := c.GetString("transportType", "All")
-	query := models.Find(new(models.Transport)).
-		Offset((start - 1) * count).
-		Limit(count)
-	rawSetter := models.Raw(query)
-	if transportType != "All" {
-		query.Where("transport_type = ?")
-		rawSetter = models.Raw(query).SetArgs(transportType)
-	}
-	list := make([]*models.Transport, 0)
-	rowCount, err := rawSetter.QueryRows(&list)
+
+	rowCount, list, err := models.TransportSearch(map[string]string{
+		"Type": models.GetTransportType(transportType),
+	}, start, count)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
 
 	collection := responses.Collection[*responses.TransportResponse, *models.Transport](
-		new(responses.TransportResponse),
-		list,
-		false)
+		new(responses.TransportResponse), list)
 
 	c.Response(collection, controllers.DataMap{
 		"count": rowCount,
@@ -69,9 +61,7 @@ func (c *AdminTransportController) Get() {
 	transport := c.findModel(id)
 
 	response := responses.New[*responses.TransportResponse](
-		new(responses.TransportResponse),
-		transport,
-		false)
+		new(responses.TransportResponse), transport)
 	c.Response(response)
 }
 
@@ -110,9 +100,7 @@ func (c *AdminTransportController) Post() {
 		return
 	}
 	response := responses.New[*responses.TransportResponse](
-		new(responses.TransportResponse),
-		transport,
-		false)
+		new(responses.TransportResponse), transport)
 	c.Response(response, "Транспорт добавлен")
 }
 
@@ -161,9 +149,7 @@ func (c *AdminTransportController) Put() {
 		return
 	}
 	response := responses.New[*responses.TransportResponse](
-		new(responses.TransportResponse),
-		transport,
-		false)
+		new(responses.TransportResponse), transport)
 	c.Response(response, "Данные обновлены")
 }
 

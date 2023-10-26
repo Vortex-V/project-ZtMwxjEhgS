@@ -86,6 +86,10 @@ func (m *Account) Login(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	// Костыль. Старый jwt остаётся валидным в течение 1 часа.
+	// Но jwt в базе хранить это кукож, товарищи, я так делать не буду.
+	// Хотелось бы дополнительно использовать refresh token
 	m.IsNeedRelogin = false
 	_, err = Update(m, "IsNeedRelogin")
 	if err != nil {

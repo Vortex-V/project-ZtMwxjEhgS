@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"app/routers/routeHelpers"
 	"app/src/controllers"
 	"github.com/beego/beego/v2/server/web"
 )
@@ -8,10 +9,10 @@ import (
 func Rent() *web.Namespace {
 	controller := &controllers.RentController{}
 	return web.NewNamespace("/Rent").
-		Router("/:id:int", controller, "get:Get").
 		Router("/Transport", controller, "get:Transport").
-		Router("/MyHistory", controller, "get:MyHistory").
-		Router("/TransportHistory/:id:int", controller, "get:TransportHistory").
-		Router("/New/:id:int", controller, "post:New").
-		Router("/End/:id:int", controller, "post:End")
+		Namespace(routeHelpers.RouteWithAuth("/:id:int", controller, "get:Get")).
+		Namespace(routeHelpers.RouteWithAuth("/MyHistory", controller, "get:MyHistory")).
+		Namespace(routeHelpers.RouteWithAuth("/TransportHistory/:id:int", controller, "get:TransportHistory")).
+		Namespace(routeHelpers.RouteWithAuth("/New/:id:int", controller, "post:New")).
+		Namespace(routeHelpers.RouteWithAuth("/End/:id:int", controller, "post:End"))
 }

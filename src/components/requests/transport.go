@@ -1,7 +1,13 @@
 package requests
 
+import (
+	"app/src/models"
+	"github.com/beego/beego/v2/core/validation"
+)
+
 type (
 	TransportPostRequest struct {
+		request
 		CanBeRented   bool   `valid:"Required"`
 		TransportType string `valid:"Required"`
 		Model         string `valid:"Required"`
@@ -42,3 +48,16 @@ type (
 		DayPrice      float64
 	}
 )
+
+func (t *TransportPostRequest) Valid(v *validation.Validation) {
+	transportTypeExists(v, t.TransportType)
+}
+func (t *AdminTransportWriteRequest) Valid(v *validation.Validation) {
+	transportTypeExists(v, t.TransportType)
+}
+
+func transportTypeExists(v *validation.Validation, transportType string) {
+	if models.GetTransportType(transportType) == "" {
+		v.SetError("TransportType", "Тип транспорта должен быть одним из [Car, Bike, Scooter]")
+	}
+}

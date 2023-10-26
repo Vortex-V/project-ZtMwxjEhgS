@@ -769,7 +769,7 @@ paths:
       parameters:
       - in: path
         name: id
-        description: id
+        description: transportId
         required: true
         type: integer
         format: int64
@@ -792,7 +792,7 @@ paths:
       parameters:
       - in: path
         name: id
-        description: id
+        description: transportId
         required: true
         type: integer
         format: int64
@@ -826,7 +826,7 @@ paths:
       parameters:
       - in: path
         name: id
-        description: id
+        description: transportId
         required: true
         type: integer
         format: int64
@@ -901,28 +901,16 @@ definitions:
         format: datetime
       TransportId:
         $ref: '#/definitions/models.Transport'
-      TypeId:
-        $ref: '#/definitions/models.RentTypes'
+      Type:
+        type: string
       UpdatedAt:
         type: string
         format: datetime
-  models.RentTypes:
-    title: RentTypes
-    type: object
-    properties:
-      Id:
-        type: integer
-        format: int64
-      Status:
-        type: integer
-        format: int64
-      Title:
-        type: string
   models.Transport:
     title: Transport
     type: object
     properties:
-      AccountId:
+      Account:
         $ref: '#/definitions/models.Account'
       CanBeRented:
         type: boolean

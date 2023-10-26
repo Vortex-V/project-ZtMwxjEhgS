@@ -95,8 +95,10 @@ func (c *AccountController) SignOut() {
 		return
 	}
 
+	// Костыль. Старый jwt остаётся валидным в течение 1 часа.
+	// Но jwt в базе хранить это кукож, товарищи, я так делать не буду.
+	// Хотелось бы дополнительно использовать refresh token
 	account.IsNeedRelogin = true
-
 	_, err = models.Update(account, "IsNeedRelogin")
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
