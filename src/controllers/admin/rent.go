@@ -110,7 +110,7 @@ func (c *AdminRentController) Delete() {
 
 func (c *AdminRentController) findModel(id int64) *models.Rent {
 	m := &models.Rent{Id: id}
-	if err := models.Get(m); err != nil {
+	if err := models.Read(m); err != nil {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return nil
 	}

@@ -178,7 +178,7 @@ func (c *TransportController) Delete() {
 
 func (c *TransportController) findModel(id int64) *models.Transport {
 	m := &models.Transport{Id: id}
-	if err := models.Get(m); err != nil {
+	if err := models.Read(m); err != nil {
 		c.ResponseError(ErrorNotFound, 404)
 		return nil
 	}

@@ -192,7 +192,7 @@ func (c *AdminAccountController) Delete() {
 
 func (c *AdminAccountController) findModel(id int64) *models.Account {
 	m := &models.Account{Id: id}
-	if err := models.Get(m); err != nil {
+	if err := models.Read(m); err != nil {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return nil
 	}

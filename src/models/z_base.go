@@ -43,13 +43,13 @@ type model struct{}
 
 func (m *model) implement(_ Model) {}
 
-// Функции Get, Insert, Update, Delete, Exists
+// Функции Read, Insert, Update, Delete, Exists
 // позволяют однозначно определить,
 // что необходимо передавать указатель на Model в качестве параметра.
 // Базовые функции orm.Ormer не защищают от этого и работают некорректно,
 // если передавать не указатель.
 
-func Get(model Model, by ...string) (err error) {
+func Read(model Model, by ...string) (err error) {
 	return o.Read(model, by...)
 }
 

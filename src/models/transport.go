@@ -52,7 +52,24 @@ func GetTransportType(label string) string {
 	}
 }
 
-// TODO minute day price -> CanBeRented при создании
+func (t *Transport) GetPriceByRentType(rentType string) float64 {
+	if rentType == RentTypeMinutes {
+		return t.MinutePrice
+	} else if rentType == RentTypeDays {
+		return t.DayPrice
+	}
+	return 0
+}
+
+func (t *Transport) Create() error {
+
+	if t.MinutePrice == 0 && t.DayPrice == 0 {
+		t.CanBeRented = false
+	}
+
+	_, err := o.Insert(t)
+	return err
+}
 
 func TransportSearch(params map[string]string) (int64, []*Transport, error) {
 	o := orm.NewOrm()

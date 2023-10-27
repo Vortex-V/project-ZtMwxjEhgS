@@ -17,7 +17,8 @@ type RentController struct {
 // @Param	long	query	float64	false	Географическая долгота местонахождения транспорта
 // @Param	radius	query	float64	false	Радиус круга поиска транспорта
 // @Param	type	query	string	false	Тип транспорта [Car, Bike, Scooter, All]
-// @Success 201 {object} responses.RentTransportResponseCollection
+// @Success 200	{object}	responses.TransportResponse
+// @Failure 400 invalid params
 // @Failure 404 not found
 // @router /Transport [get]
 func (c *RentController) Transport() {
@@ -49,37 +50,84 @@ func (c *RentController) Transport() {
 // @Title Get
 // @Description Получение информации об аренде по id
 // @Security	api_key
-// @Param	rentId	path 	int64	true	rentId
-// @Success 201 {object} responses.RentGetResponse
+// @Param	rentId	path 	int64	true	"rentId"
+// @Success 200 {object} responses.RentResponse
+// @Failure 400 :id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /:rentId [get]
+// @router /:id [get]
 func (c *RentController) Get() {
+	id, _ := c.GetInt64(":id", 0)
+	if id == 0 {
+		c.ResponseError(ErrorBadRequest, 400)
+		return
+	}
 
+	rent := c.findModel(id)
+
+	if rent.IsOwner(id) || rent.IsRenter(id) {
+		c.ResponseError("Нет прав для получения данных", 403)
+		return
+	}
+
+	response := responses.New[*responses.RentResponse](
+		new(responses.RentResponse), rent)
+	c.Response(response)
 }
 
 // MyHistory
 // @Title MyHistory
 // @Description Получение истории аренд текущего аккаунта
 // @Security	api_key
-// @Success 201 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
+// @Success 200 {object} responses.RentResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure 401 unauthorized
 // @router /MyHistory [get]
 func (c *RentController) MyHistory() {
+	id := c.GetString("accountId", "")
 
+	rowCount, list, err := models.RentSearch(map[string]string{
+		"account_id": id,
+	})
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	collection := responses.Collection[*responses.RentResponse, *models.Rent](
+		new(responses.RentResponse), list)
+	c.Response(collection, DataMap{
+		"count": rowCount,
+	})
 }
 
 // TransportHistory
 // @Title TransportHistory
 // @Description Получение истории аренд транспорта
 // @Security	api_key
-// @Param	transportId	path 	int64	true	transportId
-// @Success 201 {object} responses.RentGetResponse	Список из указанных объектов может быть получен по ключу data
+// @Param	transportId	path	int64	true	"transportId"
+// @Success 200 {object} responses.RentResponse	Список из указанных объектов может быть получен по ключу data
+// @Failure 400 :id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /TransportHistory/:transportId [get]
 func (c *RentController) TransportHistory() {
+	accountId := c.GetString("accountId", "")
+	transportId := c.GetString(":id", "")
 
+	rowCount, list, err := models.RentSearch(map[string]string{
+		"owner_id":     accountId,
+		"transport_id": transportId,
+	})
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	collection := responses.Collection[*responses.RentResponse, *models.Rent](
+		new(responses.RentResponse), list)
+	c.Response(collection, DataMap{
+		"count": rowCount,
+	})
 }
 
 // New
@@ -88,12 +136,50 @@ func (c *RentController) TransportHistory() {
 // @Security	api_key
 // @Param	transportId	path 	int64	true	transportId
 // @Param	rentType	query 	string	true	Тип аренды [Minutes, Days]
-// @Success 201 {object} responses.RentGetResponse
+// @Success 200 {object} responses.RentResponse
+// @Failure 400 :id is empty
+// @Failure 400 invalid params
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /New/:transportId [post]
 func (c *RentController) New() {
+	accountId, err := c.GetInt64("accountId")
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+	transportId, _ := c.GetInt64(":id", 0)
+	if transportId == 0 {
+		c.ResponseError(ErrorBadRequest, 400)
+		return
+	}
+	rentType := c.GetString("rentType", "")
+	if rentType == "" {
+		c.ResponseError("rentType is empty", 400)
+		return
+	}
 
+	rent := &models.Rent{
+		Account:     &models.Account{Id: accountId},
+		Type:        models.GetRentType(rentType),
+		Transport:   &models.Transport{Id: transportId},
+		PriceOfUnit: 0,
+		FinalPrice:  0,
+	}
+	err = models.Read(rent.Transport)
+	if err != nil {
+		c.ResponseError(ErrorNotFound, 404)
+		return
+	}
+	err = rent.Create()
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	response := responses.New[*responses.RentResponse](
+		new(responses.RentResponse), rent)
+	c.Response(response)
 }
 
 // End
@@ -103,18 +189,40 @@ func (c *RentController) New() {
 // @Param	rentId	path 	int64	true	rentId
 // @Param	lat	query	float64	false Географическая широта местонахождения транспорта
 // @Param	long	query	float64	false Географическая долгота местонахождения транспорта
-// @Success 201
+// @Success 200
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /End/:rentId [post]
 func (c *RentController) End() {
+	accountId, err := c.GetInt64("accountId")
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+	rentId, _ := c.GetInt64(":id", 0)
+	if rentId == 0 {
+		c.ResponseError(ErrorBadRequest, 400)
+		return
+	}
 
+	rent := c.findModel(rentId)
+	if !rent.IsRenter(accountId) {
+		c.ResponseError("Нет прав для завершения аренды", 403)
+	}
+
+	err = rent.End()
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	c.Response("Аренда завершена")
 }
 
 func (c *RentController) findModel(id int64) *models.Rent {
 	m := &models.Rent{Id: id}
-	if err := models.Get(m); err != nil {
+	if err := models.Read(m); err != nil {
 		c.ResponseError(ErrorNotFound, 404)
 		return nil
 	}

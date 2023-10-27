@@ -96,11 +96,12 @@ func (c *AdminTransportController) Post() {
 		DayPrice:    data.DayPrice,
 	}
 
-	_, err := models.Insert(transport)
+	err := transport.Create()
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
+
 	response := responses.New[*responses.TransportResponse](
 		new(responses.TransportResponse), transport)
 	c.Response(response, "Транспорт добавлен")
@@ -181,7 +182,7 @@ func (c *AdminTransportController) Delete() {
 
 func (c *AdminTransportController) findModel(id int64) *models.Transport {
 	m := &models.Transport{Id: id}
-	if err := models.Get(m); err != nil {
+	if err := models.Read(m); err != nil {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return nil
 	}

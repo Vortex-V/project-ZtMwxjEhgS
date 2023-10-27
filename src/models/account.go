@@ -73,7 +73,7 @@ func (m *Account) GetStatusLabel(key int) string {
 }
 
 func (m *Account) Login(password string) (string, error) {
-	err := Get(m, "Username")
+	err := Read(m, "Username")
 	if err != nil {
 		return "", auth.ErrorUsernameOrPasswordIncorrect
 	}
