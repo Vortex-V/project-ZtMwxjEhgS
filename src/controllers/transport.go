@@ -13,7 +13,7 @@ type TransportController struct {
 
 // Get
 // @Title Get
-// @Description get Transport by Id
+// @Description Получение информации о транспорте по id
 // @Param	id	path 	int64	true	"transportId"
 // @Success 200 {object} responses.TransportResponse	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty
@@ -34,7 +34,7 @@ func (c *TransportController) Get() {
 
 // Post
 // @Title Post
-// @Description create Transport
+// @Description Добавление нового транспорта
 // @Security	api_key
 // @Param	body	body	requests.TransportPostRequest	"transport info"
 // @Success 200	{object}	responses.TransportResponse	Указанный объект может быть получен по ключу data
@@ -80,7 +80,7 @@ func (c *TransportController) Post() {
 
 // Put
 // @Title Put
-// @Description	update the Transport
+// @Description	Изменение транспорта по id
 // @Security	api_key
 // @Param	id	path 	int64	true	"transportId"
 // @Param	body	body	requests.TransportPutRequest "transport info"
@@ -140,7 +140,7 @@ func (c *TransportController) Put() {
 
 // Delete
 // @Title Delete
-// @Description delete the Transport
+// @Description Удаление транспорта по id
 // @Security	api_key
 // @Param	id	path 	int64	true	"transportId"
 // @Success 201

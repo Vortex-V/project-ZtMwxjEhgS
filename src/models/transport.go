@@ -1,6 +1,9 @@
 package models
 
 import (
+	"errors"
+	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -49,18 +52,52 @@ func GetTransportType(label string) string {
 	}
 }
 
-func TransportSearch(params map[string]string, offset int, limit int) (int64, []*Transport, error) {
+// TODO minute day price -> CanBeRented при создании
+
+func TransportSearch(params map[string]string) (int64, []*Transport, error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Transport))
 
-	for k, v := range params {
-		if v != "" {
-			qs = qs.Filter(k, v)
+	if params["lat"] != "" &&
+		params["long"] != "" &&
+		params["radius"] != "" {
+		lat, err := strconv.ParseFloat(params["lat"], 64)
+		long, err := strconv.ParseFloat(params["long"], 64)
+		radius, err := strconv.ParseFloat(params["radius"], 64)
+		if err != nil {
+			return 0, nil, errors.New("lat, long, radius must be float")
 		}
+		// Делаем подзапрос с выборкой id, так как QuerySetter требует указать имя поля, для которого применить фильтр
+		q := Find(new(Transport), "id").
+			Where(fmt.Sprintf("pow(transports.latitude-%f, 2) + pow(transports.longitude-%f,2)<=pow(%f,2)", lat, long, radius)).
+			String()
+		cond := orm.NewCondition()
+		// два раза in, потому что он сам не добавляет in (баг? || устаревшая документация?)
+		cond = cond.Raw("id__in", fmt.Sprintf("in (%s)", q))
+		qs = qs.SetCond(cond)
+
+	}
+
+	if params["type"] != "" && params["type"] != "All" {
+		qs = qs.Filter("type", params["type"])
+	}
+
+	if params["can_be_rented"] != "" && params["can_be_rented"] != "All" {
+		qs = qs.Filter("can_be_rented", params["can_be_rented"] == "1")
+	}
+
+	if params["start"] != "" &&
+		params["count"] != "" {
+		start, err := strconv.ParseInt(params["start"], 10, 64)
+		count, err := strconv.ParseInt(params["count"], 10, 64)
+		if err != nil {
+			return 0, nil, errors.New("start, count must be int")
+		}
+		qs = qs.Limit(count, (start-1)*count)
 	}
 
 	var list []*Transport
-	rowCount, err := qs.Limit(limit, (offset-1)*limit).All(&list)
+	rowCount, err := qs.All(&list)
 	if err != nil {
 		return 0, nil, err
 	}

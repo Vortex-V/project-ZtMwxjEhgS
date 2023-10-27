@@ -23,13 +23,15 @@ type AdminTransportController struct {
 // @Failure 401 unauthorized
 // @router / [get]
 func (c *AdminTransportController) GetAll() {
-	start, _ := c.GetInt("start", 1)
-	count, _ := c.GetInt("count", 10)
+	start := c.GetString("start", "1")
+	count := c.GetString("count", "10")
 	transportType := c.GetString("transportType", "All")
 
 	rowCount, list, err := models.TransportSearch(map[string]string{
-		"Type": models.GetTransportType(transportType),
-	}, start, count)
+		"type":  models.GetTransportType(transportType),
+		"start": start,
+		"count": count,
+	})
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return

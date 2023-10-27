@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app/src/components/responses"
 	"app/src/models"
 )
 
@@ -20,7 +21,28 @@ type RentController struct {
 // @Failure 404 not found
 // @router /Transport [get]
 func (c *RentController) Transport() {
+	lat := c.GetString("lat", "")
+	long := c.GetString("long", "")
+	radius := c.GetString("radius", "")
+	transportType := c.GetString("type", "All")
 
+	rowCount, list, err := models.TransportSearch(map[string]string{
+		"type":          models.GetTransportType(transportType),
+		"lat":           lat,
+		"long":          long,
+		"radius":        radius,
+		"can_be_rented": "1",
+	})
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	collection := responses.Collection[*responses.TransportResponse, *models.Transport](
+		new(responses.TransportResponse), list)
+	c.Response(collection, DataMap{
+		"count": rowCount,
+	})
 }
 
 // Get
