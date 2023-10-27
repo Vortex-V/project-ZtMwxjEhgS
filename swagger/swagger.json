@@ -539,7 +539,7 @@
                     "200": {
                         "description": "Список из указанных объектов может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
                     "400": {
@@ -580,7 +580,7 @@
                     "200": {
                         "description": "Список из указанных объектов может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
                     "400": {
@@ -871,7 +871,7 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": ""
                     },
                     "400": {
@@ -899,10 +899,10 @@
                 "description": "Получение истории аренд текущего аккаунта\n\u003cbr\u003e",
                 "operationId": "RentController.MyHistory",
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Список из указанных объектов может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
                     "401": {
@@ -940,11 +940,14 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
+                    },
+                    "400": {
+                        "description": "invalid params"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -997,11 +1000,14 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentTransportResponseCollection"
+                            "$ref": "#/definitions/responses.TransportResponse"
                         }
+                    },
+                    "400": {
+                        "description": "invalid params"
                     },
                     "404": {
                         "description": "not found"
@@ -1027,11 +1033,14 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Список из указанных объектов может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
+                    },
+                    "400": {
+                        "description": ":id is empty"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -1047,7 +1056,7 @@
                 ]
             }
         },
-        "/Rent/{rentId}": {
+        "/Rent/{id}": {
             "get": {
                 "tags": [
                     "Rent"
@@ -1065,11 +1074,14 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/responses.RentGetResponse"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
+                    },
+                    "400": {
+                        "description": ":id is empty"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -1090,7 +1102,7 @@
                 "tags": [
                     "Transport"
                 ],
-                "description": "create Transport\n\u003cbr\u003e",
+                "description": "Добавление нового транспорта\n\u003cbr\u003e",
                 "operationId": "TransportController.Post",
                 "parameters": [
                     {
@@ -1128,7 +1140,7 @@
                 "tags": [
                     "Transport"
                 ],
-                "description": "get Transport by Id\n\u003cbr\u003e",
+                "description": "Получение информации о транспорте по id\n\u003cbr\u003e",
                 "operationId": "TransportController.Get",
                 "parameters": [
                     {
@@ -1159,7 +1171,7 @@
                 "tags": [
                     "Transport"
                 ],
-                "description": "update the Transport\n\u003cbr\u003e",
+                "description": "Изменение транспорта по id\n\u003cbr\u003e",
                 "operationId": "TransportController.Put",
                 "parameters": [
                     {
@@ -1209,7 +1221,7 @@
                 "tags": [
                     "Transport"
                 ],
-                "description": "delete the Transport\n\u003cbr\u003e",
+                "description": "Удаление транспорта по id\n\u003cbr\u003e",
                 "operationId": "TransportController.Delete",
                 "parameters": [
                     {
@@ -1290,7 +1302,7 @@
             "title": "Rent",
             "type": "object",
             "properties": {
-                "AccountId": {
+                "Account": {
                     "$ref": "#/definitions/models.Account"
                 },
                 "CreatedAt": {
@@ -1310,8 +1322,7 @@
                     "format": "double"
                 },
                 "Status": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "string"
                 },
                 "TimeEnd": {
                     "type": "string",
@@ -1321,7 +1332,7 @@
                     "type": "string",
                     "format": "datetime"
                 },
-                "TransportId": {
+                "Transport": {
                     "$ref": "#/definitions/models.Transport"
                 },
                 "Type": {
@@ -1603,15 +1614,6 @@
             "title": "request",
             "type": "object"
         },
-        "requests.usernameUniqueRequest": {
-            "title": "usernameUniqueRequest",
-            "type": "object",
-            "properties": {
-                "Username": {
-                    "type": "string"
-                }
-            }
-        },
         "responses.AccountMeResponse": {
             "title": "AccountMeResponse",
             "type": "object",
@@ -1665,8 +1667,8 @@
                 }
             }
         },
-        "responses.RentGetResponse": {
-            "title": "RentGetResponse",
+        "responses.RentResponse": {
+            "title": "RentResponse",
             "type": "object",
             "properties": {
                 "AccountId": {
@@ -1686,16 +1688,13 @@
                     "format": "double"
                 },
                 "Status": {
-                    "type": "integer",
-                    "format": "int64"
+                    "type": "string"
                 },
                 "TimeEnd": {
-                    "type": "string",
-                    "format": "datetime"
+                    "type": "string"
                 },
                 "TimeStart": {
-                    "type": "string",
-                    "format": "datetime"
+                    "type": "string"
                 },
                 "TransportId": {
                     "type": "integer",
@@ -1703,63 +1702,6 @@
                 },
                 "Type": {
                     "type": "string"
-                }
-            }
-        },
-        "responses.RentTransportResponse": {
-            "title": "RentTransportResponse",
-            "type": "object",
-            "properties": {
-                "AccountId": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "Color": {
-                    "type": "string"
-                },
-                "DayPrice": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "Description": {
-                    "type": "string"
-                },
-                "Id": {
-                    "type": "integer",
-                    "format": "int64"
-                },
-                "Identifier": {
-                    "type": "string"
-                },
-                "Latitude": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "Longitude": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "MinutePrice": {
-                    "type": "number",
-                    "format": "double"
-                },
-                "Model": {
-                    "type": "string"
-                },
-                "Type": {
-                    "type": "string"
-                }
-            }
-        },
-        "responses.RentTransportResponseCollection": {
-            "title": "RentTransportResponseCollection",
-            "type": "object",
-            "properties": {
-                "Transports": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/responses.RentTransportResponse"
-                    }
                 }
             }
         },

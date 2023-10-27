@@ -362,7 +362,7 @@ paths:
         "200":
           description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
         "400":
           description: :id is empty
         "401":
@@ -390,7 +390,7 @@ paths:
         "200":
           description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
         "400":
           description: :id is empty
         "401":
@@ -563,7 +563,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Rent/{rentId}:
+  /Rent/{id}:
     get:
       tags:
       - Rent
@@ -579,10 +579,12 @@ paths:
         type: integer
         format: int64
       responses:
-        "201":
+        "200":
           description: ""
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: :id is empty
         "401":
           description: unauthorized
         "404":
@@ -615,7 +617,7 @@ paths:
         type: number
         format: double
       responses:
-        "201":
+        "200":
           description: ""
         "400":
           description: :id is empty
@@ -634,10 +636,10 @@ paths:
         <br>
       operationId: RentController.MyHistory
       responses:
-        "201":
+        "200":
           description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
         "401":
           description: unauthorized
       security:
@@ -662,10 +664,12 @@ paths:
         description: "true"
         type: string
       responses:
-        "201":
+        "200":
           description: ""
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: invalid params
         "401":
           description: unauthorized
         "404":
@@ -701,10 +705,12 @@ paths:
         description: "false"
         type: string
       responses:
-        "201":
+        "200":
           description: ""
           schema:
-            $ref: '#/definitions/responses.RentTransportResponseCollection'
+            $ref: '#/definitions/responses.TransportResponse'
+        "400":
+          description: invalid params
         "404":
           description: not found
   /Rent/TransportHistory/{transportId}:
@@ -723,10 +729,12 @@ paths:
         type: integer
         format: int64
       responses:
-        "201":
+        "200":
           description: Список из указанных объектов может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.RentGetResponse'
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: :id is empty
         "401":
           description: unauthorized
         "404":
@@ -738,7 +746,7 @@ paths:
       tags:
       - Transport
       description: |-
-        create Transport
+        Добавление нового транспорта
         <br>
       operationId: TransportController.Post
       parameters:
@@ -763,7 +771,7 @@ paths:
       tags:
       - Transport
       description: |-
-        get Transport by Id
+        Получение информации о транспорте по id
         <br>
       operationId: TransportController.Get
       parameters:
@@ -786,7 +794,7 @@ paths:
       tags:
       - Transport
       description: |-
-        update the Transport
+        Изменение транспорта по id
         <br>
       operationId: TransportController.Put
       parameters:
@@ -820,7 +828,7 @@ paths:
       tags:
       - Transport
       description: |-
-        delete the Transport
+        Удаление транспорта по id
         <br>
       operationId: TransportController.Delete
       parameters:
@@ -876,7 +884,7 @@ definitions:
     title: Rent
     type: object
     properties:
-      AccountId:
+      Account:
         $ref: '#/definitions/models.Account'
       CreatedAt:
         type: string
@@ -891,15 +899,14 @@ definitions:
         type: number
         format: double
       Status:
-        type: integer
-        format: int64
+        type: string
       TimeEnd:
         type: string
         format: datetime
       TimeStart:
         type: string
         format: datetime
-      TransportId:
+      Transport:
         $ref: '#/definitions/models.Transport'
       Type:
         type: string
@@ -1095,12 +1102,6 @@ definitions:
   requests.request:
     title: request
     type: object
-  requests.usernameUniqueRequest:
-    title: usernameUniqueRequest
-    type: object
-    properties:
-      Username:
-        type: string
   responses.AccountMeResponse:
     title: AccountMeResponse
     type: object
@@ -1138,8 +1139,8 @@ definitions:
         type: string
       Username:
         type: string
-  responses.RentGetResponse:
-    title: RentGetResponse
+  responses.RentResponse:
+    title: RentResponse
     type: object
     properties:
       AccountId:
@@ -1155,59 +1156,16 @@ definitions:
         type: number
         format: double
       Status:
-        type: integer
-        format: int64
+        type: string
       TimeEnd:
         type: string
-        format: datetime
       TimeStart:
         type: string
-        format: datetime
       TransportId:
         type: integer
         format: int64
       Type:
         type: string
-  responses.RentTransportResponse:
-    title: RentTransportResponse
-    type: object
-    properties:
-      AccountId:
-        type: integer
-        format: int64
-      Color:
-        type: string
-      DayPrice:
-        type: number
-        format: double
-      Description:
-        type: string
-      Id:
-        type: integer
-        format: int64
-      Identifier:
-        type: string
-      Latitude:
-        type: number
-        format: double
-      Longitude:
-        type: number
-        format: double
-      MinutePrice:
-        type: number
-        format: double
-      Model:
-        type: string
-      Type:
-        type: string
-  responses.RentTransportResponseCollection:
-    title: RentTransportResponseCollection
-    type: object
-    properties:
-      Transports:
-        type: array
-        items:
-          $ref: '#/definitions/responses.RentTransportResponse'
   responses.TransportResponse:
     title: TransportResponse
     type: object
