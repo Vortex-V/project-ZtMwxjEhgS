@@ -839,7 +839,7 @@
                 ]
             }
         },
-        "/Rent/End/{rentId}": {
+        "/Rent/End/{id}": {
             "post": {
                 "tags": [
                     "Rent"
@@ -858,14 +858,16 @@
                     {
                         "in": "query",
                         "name": "lat",
-                        "description": "false",
+                        "description": "Географическая широта местонахождения транспорта",
+                        "required": true,
                         "type": "number",
                         "format": "double"
                     },
                     {
                         "in": "query",
                         "name": "long",
-                        "description": "false",
+                        "description": "Географическая долгота местонахождения транспорта",
+                        "required": true,
                         "type": "number",
                         "format": "double"
                     }
@@ -916,7 +918,7 @@
                 ]
             }
         },
-        "/Rent/New/{transportId}": {
+        "/Rent/New/{id}": {
             "post": {
                 "tags": [
                     "Rent"
@@ -935,7 +937,8 @@
                     {
                         "in": "query",
                         "name": "rentType",
-                        "description": "true",
+                        "description": "Тип аренды [Minutes, Days]",
+                        "required": true,
                         "type": "string"
                     }
                 ],

@@ -28,7 +28,7 @@ func (c *AdminTransportController) GetAll() {
 	transportType := c.GetString("transportType", "All")
 
 	rowCount, list, err := models.TransportSearch(map[string]string{
-		"type":  models.GetTransportType(transportType),
+		"type":  models.GetTransportTypeLabel(transportType),
 		"start": start,
 		"count": count,
 	})
@@ -78,7 +78,7 @@ func (c *AdminTransportController) Get() {
 // @router / [post]
 func (c *AdminTransportController) Post() {
 	var data requests.AdminTransportWriteRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
@@ -127,7 +127,7 @@ func (c *AdminTransportController) Put() {
 	}
 
 	var data requests.AdminTransportWriteRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 

@@ -9,5 +9,5 @@ import (
 func Payment() *web.Namespace {
 	controller := &controllers.PaymentController{}
 	return web.NewNamespace("/Payment").
-		Namespace(routeHelpers.RouteWithAuth("/Hesoyam/:id:int", controller, "post:Hesoyam"))
+		Namespace(routeHelpers.RouteWithAuth("/Hesoyam", "/:id:int", controller, "post:Hesoyam"))
 }

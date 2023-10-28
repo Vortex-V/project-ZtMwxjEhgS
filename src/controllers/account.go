@@ -39,7 +39,7 @@ func (c *AccountController) Me() {
 // @router /SignIn [post]
 func (c *AccountController) SignIn() {
 	var data requests.AccountSignInRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
@@ -64,7 +64,7 @@ func (c *AccountController) SignIn() {
 // @router /SignUp [post]
 func (c *AccountController) SignUp() {
 	var data requests.AccountSingUpRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
@@ -123,7 +123,7 @@ func (c *AccountController) Update() {
 		return
 	}
 	var data requests.AccountUpdateRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 

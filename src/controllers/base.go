@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app/src/components/forms"
 	"app/src/components/requests"
 	"app/src/components/responses"
 	"app/src/models"
@@ -109,6 +110,7 @@ func (c *Controller) ResponseMapTo(r responses.Response, data ...interface{}) {
 }
 
 func (c *Controller) ResponseError(data interface{}, status int) {
+	// TODO рендерит страницы с ошибками заместо json, надо переопределить хандлер ошибок
 	switch data.(type) {
 	case DataMap, string:
 		c.ResponseJson(DataMap{"error": data}, status)
@@ -117,43 +119,47 @@ func (c *Controller) ResponseError(data interface{}, status int) {
 	}
 }
 
-func (c *Controller) LoadAndValidate(data requests.Request) bool {
-	err := c.parseRequestBody(data)
+func (c *Controller) ParseAndValidateRequest(data requests.Request) bool {
+	err := c.Ctx.BindJSON(data)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return false
 	}
 
-	if validationErrors := validateRequest(data); len(validationErrors) > 0 {
+	if validationErrors := validate(data); len(validationErrors) > 0 {
 		c.ResponseError(validationErrors, 400)
 		return false
 	}
 	return true
 }
 
-func (c *Controller) parseRequestBody(data requests.Request) (err error) {
-	err = json.Unmarshal(c.Ctx.Input.RequestBody, data)
+func (c *Controller) ParseAndValidateQuery(data forms.Form) bool {
+	err := c.Ctx.BindForm(data)
 	if err != nil {
-		return err
+		c.ResponseError(err.Error(), 500)
+		return false
 	}
-
-	return nil
+	if validationErrors := validate(data); len(validationErrors) > 0 {
+		c.ResponseError(validationErrors, 400)
+		return false
+	}
+	return true
 }
 
-func validateRequest(data requests.Request) DataMap {
+func validate(data interface{}) DataMap {
 	var (
-		errors = make(DataMap)
-		valid  = validation.Validation{}
+		validationErrors = make(DataMap)
+		valid            = validation.Validation{}
 	)
 	result, err := valid.Valid(data)
 	if err != nil { // Ошибки валидатора
-		errors["error"] = err.Error()
+		validationErrors["error"] = err.Error()
 	} else if !result { // Запрос невалиден
 		for _, err := range valid.Errors {
-			errors[err.Field] = err.Message
+			validationErrors[err.Field] = err.Message
 		}
 	}
-	return errors
+	return validationErrors
 }
 
 func toCollection(data interface{}) ([]DataMap, error) {

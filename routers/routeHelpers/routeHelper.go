@@ -2,8 +2,8 @@ package routeHelpers
 
 import "github.com/beego/beego/v2/server/web"
 
-func RouteWithAuth(rootpath string, controller web.ControllerInterface, methods string) *web.Namespace {
-	return web.NewNamespace(rootpath).
+func RouteWithAuth(prefix, route string, controller web.ControllerInterface, methods string) *web.Namespace {
+	return web.NewNamespace(prefix).
 		Filter("before", AuthFilter).
-		Router("/", controller, methods)
+		Router(route, controller, methods)
 }

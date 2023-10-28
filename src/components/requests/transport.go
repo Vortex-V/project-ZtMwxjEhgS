@@ -57,7 +57,7 @@ func (t *AdminTransportWriteRequest) Valid(v *validation.Validation) {
 }
 
 func transportTypeExists(v *validation.Validation, transportType string) {
-	if models.GetTransportType(transportType) == "" {
+	if models.GetTransportTypeLabel(transportType) == "" {
 		v.SetError("TransportType", "Тип транспорта должен быть одним из [Car, Bike, Scooter]")
 	}
 }

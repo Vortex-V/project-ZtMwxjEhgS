@@ -84,7 +84,7 @@ func (c *AdminAccountController) Get() {
 // @router / [post]
 func (c *AdminAccountController) Post() {
 	var data requests.AdminAccountWriteRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
@@ -133,7 +133,7 @@ func (c *AdminAccountController) Put() {
 	}
 
 	var data requests.AdminAccountWriteRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 

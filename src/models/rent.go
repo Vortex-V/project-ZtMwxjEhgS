@@ -4,7 +4,6 @@ import (
 	"errors"
 	"math"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -49,6 +48,7 @@ func (t *Rent) GetStatusLabel() string {
 	return statusLabels[t.Status]
 }
 
+// TODO сейчас типы сильно перегружены. Если единственным различием останется написание с заглавной, то убрать все эти проверки и хранить только лейблы
 const (
 	RentTypeMinutes = "minutes"
 	RentTypeDays    = "days"
@@ -63,13 +63,30 @@ func (t *Rent) GetRentTypeLabel() string {
 	return rentTypeLabels[t.Type]
 }
 
-func GetRentType(label string) string {
-	label = strings.ToLower(label)
-	if v, ok := rentTypeLabels[label]; ok {
+func GetRentType(key string) string {
+	if v, ok := rentTypeLabels[key]; ok {
 		return v
 	} else {
 		return ""
 	}
+}
+
+func GetRentTypeKeyByLabel(label string) string {
+	for k, v := range rentTypeLabels {
+		if v == label {
+			return k
+		}
+	}
+	return ""
+}
+
+func (t *Rent) GetPriceByRentType(key string) float64 {
+	if key == RentTypeMinutes {
+		return t.Transport.MinutePrice
+	} else if key == RentTypeDays {
+		return t.Transport.DayPrice
+	}
+	return 0
 }
 
 func (t *Rent) IsRenter(id int64) bool {
@@ -88,7 +105,7 @@ func (t *Rent) Create() error {
 		return errors.New("транспорт уже арендован")
 	}
 
-	t.PriceOfUnit = t.Transport.GetPriceByRentType(t.Type)
+	t.PriceOfUnit = t.GetPriceByRentType(t.Type)
 	// t.Transport.Status = TransportStatusRented TODO заместо изменения CanBeRented
 	t.Transport.CanBeRented = false
 	t.TimeStart = time.Now()
@@ -99,7 +116,10 @@ func (t *Rent) Create() error {
 	return err
 }
 
-func (t *Rent) End() error {
+func (t *Rent) End(params map[string]interface{}) error {
+	t.Transport.Latitude = (params["lat"]).(float64)
+	t.Transport.Longitude = (params["long"]).(float64)
+
 	if t.Status != RentStatusActive {
 		return errors.New("нельзя завершить неактивную аренду")
 	}

@@ -39,26 +39,40 @@ func (t *Transport) IsOwner(id int64) bool {
 	return t.Account.Id == id
 }
 
-func GetTransportType(label string) string {
-	types := map[string]string{
-		"Car":     "Car",
-		"Bike":    "Bike",
-		"Scooter": "Scooter",
-	}
-	if v, ok := types[label]; ok {
+// TODO сейчас типы сильно перегружены. Если единственным различием останется написание с заглавной, то убрать все эти проверки и хранить только лейблы
+const (
+	TransportTypeCar     = "car"
+	TransportTypeBike    = "bike"
+	TransportTypeScooter = "scooter"
+)
+
+var transportTypeLabels = map[string]string{
+	TransportTypeCar:     "Car",
+	TransportTypeBike:    "Bike",
+	TransportTypeScooter: "Scooter",
+}
+
+func GetTransportTypeLabel(key string) string {
+	if v, ok := transportTypeLabels[key]; ok {
 		return v
 	} else {
 		return ""
 	}
 }
 
-func (t *Transport) GetPriceByRentType(rentType string) float64 {
-	if rentType == RentTypeMinutes {
-		return t.MinutePrice
-	} else if rentType == RentTypeDays {
-		return t.DayPrice
+func GetTransportTypeKeyByLabel(label string) string {
+	for k, v := range transportTypeLabels {
+		if v == label {
+			return k
+		}
 	}
-	return 0
+	return ""
+}
+
+func (t *Transport) SetTransportType(key string) {
+	if v, ok := transportTypeLabels[key]; ok {
+		t.Type = v
+	}
 }
 
 func (t *Transport) Create() error {

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app/src/components/forms"
 	"app/src/components/responses"
 	"app/src/models"
 )
@@ -28,7 +29,7 @@ func (c *RentController) Transport() {
 	transportType := c.GetString("type", "All")
 
 	rowCount, list, err := models.TransportSearch(map[string]string{
-		"type":          models.GetTransportType(transportType),
+		"type":          models.GetTransportTypeLabel(transportType),
 		"lat":           lat,
 		"long":          long,
 		"radius":        radius,
@@ -134,14 +135,14 @@ func (c *RentController) TransportHistory() {
 // @Title New
 // @Description Аренда транспорта в личное пользование
 // @Security	api_key
-// @Param	transportId	path 	int64	true	transportId
-// @Param	rentType	query 	string	true	Тип аренды [Minutes, Days]
+// @Param	transportId	path 	int64	true	"transportId"
+// @Param	rentType	query 	string	true	"Тип аренды [Minutes, Days]"
 // @Success 200 {object} responses.RentResponse
 // @Failure 400 :id is empty
 // @Failure 400 invalid params
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /New/:transportId [post]
+// @router /New/:id [post]
 func (c *RentController) New() {
 	accountId, err := c.GetInt64("accountId")
 	if err != nil {
@@ -153,15 +154,21 @@ func (c *RentController) New() {
 		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
-	rentType := c.GetString("rentType", "")
+
+	form := new(forms.RentNewForm)
+	if !c.ParseAndValidateQuery(form) {
+		return
+	}
+
+	rentType := models.GetRentTypeKeyByLabel(form.RentType)
 	if rentType == "" {
-		c.ResponseError("rentType is empty", 400)
+		c.ResponseError("rentType is invalid", 400)
 		return
 	}
 
 	rent := &models.Rent{
 		Account:     &models.Account{Id: accountId},
-		Type:        models.GetRentType(rentType),
+		Type:        rentType,
 		Transport:   &models.Transport{Id: transportId},
 		PriceOfUnit: 0,
 		FinalPrice:  0,
@@ -186,14 +193,14 @@ func (c *RentController) New() {
 // @Title End
 // @Description Завершение аренды транспорта по id аренды
 // @Security	api_key
-// @Param	rentId	path 	int64	true	rentId
-// @Param	lat	query	float64	false Географическая широта местонахождения транспорта
-// @Param	long	query	float64	false Географическая долгота местонахождения транспорта
+// @Param	rentId	path 	int64	true	"rentId"
+// @Param	lat	query	float64	true "Географическая широта местонахождения транспорта"
+// @Param	long	query	float64	true "Географическая долгота местонахождения транспорта"
 // @Success 200
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /End/:rentId [post]
+// @router /End/:id [post]
 func (c *RentController) End() {
 	accountId, err := c.GetInt64("accountId")
 	if err != nil {
@@ -211,13 +218,22 @@ func (c *RentController) End() {
 		c.ResponseError("Нет прав для завершения аренды", 403)
 	}
 
-	err = rent.End()
+	form := new(forms.RentEndForm)
+	if !c.ParseAndValidateQuery(form) {
+		return
+	}
+	err = rent.End(map[string]interface{}{
+		"lat":  form.Lat,
+		"long": form.Long,
+	})
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
 
-	c.Response("Аренда завершена")
+	response := responses.New[*responses.RentResponse](
+		new(responses.RentResponse), rent)
+	c.Response(response, "Аренда завершена")
 }
 
 func (c *RentController) findModel(id int64) *models.Rent {

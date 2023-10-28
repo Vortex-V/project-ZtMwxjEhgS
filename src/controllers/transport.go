@@ -49,7 +49,7 @@ func (c *TransportController) Post() {
 	}
 
 	var data requests.TransportPostRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
@@ -104,7 +104,7 @@ func (c *TransportController) Put() {
 	}
 
 	var data requests.TransportPutRequest
-	if !c.LoadAndValidate(&data) {
+	if !c.ParseAndValidateRequest(&data) {
 		return
 	}
 
