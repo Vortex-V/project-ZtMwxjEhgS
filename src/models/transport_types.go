@@ -9,6 +9,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
+// TransportTypes TODO Задел на будущее
 type TransportTypes struct {
 	Id     int    `orm:"column(id);pk"`
 	Title  string `orm:"column(title)"`

@@ -9,6 +9,7 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
+// RentTypes TODO Задел на будущее
 type RentTypes struct {
 	Id     int    `orm:"column(id);pk"`
 	Title  string `orm:"column(title);null"`

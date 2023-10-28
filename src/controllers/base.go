@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	ErrorNotFound   = errors.New("not Found")
-	ErrorBadRequest = errors.New("bad Request")
+	ErrorNotFound     = errors.New("not Found")
+	ErrorBadRequest   = errors.New("bad Request")
+	ErrorUnauthorized = errors.New("unauthorized")
 )
 
 type Controller struct {
@@ -174,4 +175,22 @@ func toMap(data interface{}) (DataMap, error) {
 	tmpStr, _ := json.Marshal(data)
 	err := json.Unmarshal(tmpStr, &result)
 	return result, err
+}
+
+func (c *Controller) GetIdFormPath() int64 {
+	id, err := c.GetInt64(":id")
+	if err != nil {
+		c.ResponseError(ErrorBadRequest, 400)
+		return 0
+	}
+	return id
+}
+
+func (c *PaymentController) GetIdentityId() int64 {
+	accountId, err := c.GetInt64("accountId")
+	if err != nil {
+		c.ResponseError(ErrorUnauthorized, 500)
+		return 0
+	}
+	return accountId
 }
