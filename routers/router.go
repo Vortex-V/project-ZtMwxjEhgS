@@ -42,7 +42,7 @@ func init() {
 		web.NSNamespace("/Admin/Transport",
 			web.NSInclude(&adminControllers.AdminTransportController{}),
 		),
-		web.NSNamespace("/Admin/Rent",
+		web.NSNamespace("/Admin",
 			web.NSInclude(&adminControllers.AdminRentController{}),
 		),
 	)

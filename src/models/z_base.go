@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/utils"
 	"github.com/beego/beego/v2/server/web"
 	"reflect"
 )
@@ -58,6 +59,10 @@ func (m *model) implement(_ Model) {}
 
 func Read(model Model, by ...string) (err error) {
 	return o.Read(model, by...)
+}
+
+func LoadRelated(model Model, relation string, args ...utils.KV) (int64, error) {
+	return o.LoadRelated(model, relation, args...)
 }
 
 func Insert(model Model) (int64, error) {

@@ -4,6 +4,7 @@ import (
 	"app/src/components/forms"
 	"app/src/components/responses"
 	"app/src/models"
+	"github.com/beego/beego/v2/client/orm/hints"
 )
 
 // RentController operations for /Rent
@@ -53,14 +54,13 @@ func (c *RentController) Transport() {
 // @Security	api_key
 // @Param	rentId	path 	int64	true	"rentId"
 // @Success 200 {object} responses.RentResponse
-// @Failure 400 :id is empty
+// @Failure 400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /:id [get]
 func (c *RentController) Get() {
-	id, _ := c.GetInt64(":id", 0)
+	id := c.GetIdFormPath()
 	if id == 0 {
-		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
 
@@ -84,18 +84,21 @@ func (c *RentController) Get() {
 // @Failure 401 unauthorized
 // @router /MyHistory [get]
 func (c *RentController) MyHistory() {
-	id := c.GetString("accountId", "")
+	id := c.GetIdentityId()
+	if id == 0 {
+		return
+	}
 
-	rowCount, list, err := models.RentSearch(map[string]string{
-		"account_id": id,
-	})
+	account := &models.Account{Id: id}
+	rowCount, err := models.LoadRelated(account, "Rents",
+		hints.OrderBy("-Id"))
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
 	}
 
 	collection := responses.Collection[*responses.RentResponse, *models.Rent](
-		new(responses.RentResponse), list)
+		new(responses.RentResponse), account.Rents)
 	c.Response(collection, DataMap{
 		"count": rowCount,
 	})
@@ -112,10 +115,16 @@ func (c *RentController) MyHistory() {
 // @Failure 404 not found
 // @router /TransportHistory/:transportId [get]
 func (c *RentController) TransportHistory() {
-	accountId := c.GetString("accountId", "")
-	transportId := c.GetString(":id", "")
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
+		return
+	}
+	transportId := c.GetIdFormPath()
+	if transportId == 0 {
+		return
+	}
 
-	rowCount, list, err := models.RentSearch(map[string]string{
+	rowCount, list, err := models.RentSearch(map[string]interface{}{
 		"owner_id":     accountId,
 		"transport_id": transportId,
 	})
@@ -137,21 +146,19 @@ func (c *RentController) TransportHistory() {
 // @Security	api_key
 // @Param	transportId	path 	int64	true	"transportId"
 // @Param	rentType	query 	string	true	"Тип аренды [Minutes, Days]"
-// @Success 200 {object} responses.RentResponse
+// @Success 200 {object}	responses.RentResponse	Указанный объект может быть получен по ключу data
 // @Failure 400 :id is empty
 // @Failure 400 invalid params
 // @Failure 401 unauthorized
 // @Failure 404 not found
 // @router /New/:id [post]
 func (c *RentController) New() {
-	accountId, err := c.GetInt64("accountId")
-	if err != nil {
-		c.ResponseError(err.Error(), 500)
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
 		return
 	}
-	transportId, _ := c.GetInt64(":id", 0)
+	transportId := c.GetIdFormPath()
 	if transportId == 0 {
-		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
 
@@ -173,7 +180,7 @@ func (c *RentController) New() {
 		PriceOfUnit: 0,
 		FinalPrice:  0,
 	}
-	err = models.Read(rent.Transport)
+	err := models.Read(rent.Transport)
 	if err != nil {
 		c.ResponseError(ErrorNotFound, 404)
 		return
@@ -196,7 +203,7 @@ func (c *RentController) New() {
 // @Param	rentId	path 	int64	true	"rentId"
 // @Param	lat	query	float64	true "Географическая широта местонахождения транспорта"
 // @Param	long	query	float64	true "Географическая долгота местонахождения транспорта"
-// @Success 200
+// @Success 200	{object}	responses.RentResponse	Указанный объект может быть получен по ключу data
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found

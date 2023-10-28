@@ -3,7 +3,6 @@ package models
 import (
 	"errors"
 	"math"
-	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -12,7 +11,7 @@ import (
 type Rent struct {
 	model
 	Id          int64      `orm:"auto;pk"`
-	Account     *Account   `orm:"rel(one)"`
+	Account     *Account   `orm:"rel(fk)"`
 	Type        string     `orm:""`
 	Transport   *Transport `orm:"column(transport_id);rel(one)"`
 	TimeStart   time.Time  `orm:"column(time_start);type(timestamp without time zone);auto_now_add"`
@@ -97,6 +96,21 @@ func (t *Rent) IsOwner(id int64) bool {
 	return t.Transport.Account.Id == id
 }
 
+func (t *Rent) SetTimeStart(v string) (err error) {
+	t.TimeStart, err = time.Parse(time.DateTime, v)
+	return err
+}
+
+func (t *Rent) SetTimeEnd(v string) (err error) {
+	t.TimeEnd, err = time.Parse(time.DateTime, v)
+	return err
+}
+
+func (t *Rent) SetType(v string) bool {
+	t.Type = GetRentTypeKeyByLabel(v)
+	return !(t.Type == "")
+}
+
 func (t *Rent) Create() error {
 	if t.IsOwner(t.Account.Id) {
 		return errors.New("нельзя арендовать свой транспорт")
@@ -105,10 +119,14 @@ func (t *Rent) Create() error {
 		return errors.New("транспорт уже арендован")
 	}
 
-	t.PriceOfUnit = t.GetPriceByRentType(t.Type)
+	if t.PriceOfUnit == 0 {
+		t.PriceOfUnit = t.GetPriceByRentType(t.Type)
+	}
 	// t.Transport.Status = TransportStatusRented TODO заместо изменения CanBeRented
 	t.Transport.CanBeRented = false
-	t.TimeStart = time.Now()
+	if t.TimeStart.IsZero() {
+		t.TimeStart = time.Now()
+	}
 	t.Status = RentStatusActive
 
 	_, err := o.Insert(t)
@@ -145,41 +163,29 @@ func (t *Rent) calculateFinalPrice() {
 	}
 }
 
-func RentSearch(params map[string]string) (int64, []*Rent, error) {
+func RentSearch(params map[string]interface{}) (int64, []*Rent, error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Rent))
 
 	if params["owner_id"] != "" {
-		ownerId, err := strconv.ParseInt(params["owner_id"], 10, 64)
-		if err != nil {
-			return 0, nil, errors.New("owner_id must be int")
-		}
+		ownerId := params["owner_id"].(int64)
 		qs.Filter("transport__account__id", ownerId)
 	}
 
 	if params["account_id"] != "" {
-		accountId, err := strconv.ParseInt(params["account_id"], 10, 64)
-		if err != nil {
-			return 0, nil, errors.New("account_id must be int")
-		}
+		accountId := params["account_id"].(int64)
 		qs.Filter("account__id", accountId)
 	}
 
 	if params["transport_id"] != "" {
-		transportId, err := strconv.ParseInt(params["transport_id"], 10, 64)
-		if err != nil {
-			return 0, nil, errors.New("transport_id must be int")
-		}
+		transportId := params["transport_id"].(int64)
 		qs.Filter("transport__id", transportId)
 	}
 
 	if params["start"] != "" &&
 		params["count"] != "" {
-		start, err := strconv.ParseInt(params["start"], 10, 64)
-		count, err := strconv.ParseInt(params["count"], 10, 64)
-		if err != nil {
-			return 0, nil, errors.New("start, count must be int")
-		}
+		start := params["start"].(int)
+		count := params["count"].(int)
 		qs = qs.Limit(count, (start-1)*count)
 	}
 

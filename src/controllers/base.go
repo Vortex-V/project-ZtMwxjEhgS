@@ -186,7 +186,7 @@ func (c *Controller) GetIdFormPath() int64 {
 	return id
 }
 
-func (c *PaymentController) GetIdentityId() int64 {
+func (c *Controller) GetIdentityId() int64 {
 	accountId, err := c.GetInt64("accountId")
 	if err != nil {
 		c.ResponseError(ErrorUnauthorized, 500)

@@ -349,10 +349,10 @@
                 ]
             }
         },
-        "/Admin/Rent/Rent": {
+        "/Admin/Rent": {
             "post": {
                 "tags": [
-                    "Admin/Rent"
+                    "Admin"
                 ],
                 "description": "Создание новой аренды\n\u003cbr\u003e",
                 "operationId": "AdminRentController.Post",
@@ -360,7 +360,7 @@
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "info",
+                        "description": "rent info",
                         "schema": {
                             "$ref": "#/definitions/requests.AdminRentWriteRequest"
                         }
@@ -370,7 +370,7 @@
                     "200": {
                         "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/models.Rent"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
                     "400": {
@@ -378,6 +378,9 @@
                     },
                     "401": {
                         "description": "unauthorized"
+                    },
+                    "404": {
+                        "description": "not found"
                     }
                 },
                 "security": [
@@ -387,10 +390,10 @@
                 ]
             }
         },
-        "/Admin/Rent/Rent/End/{rentId}": {
+        "/Admin/Rent/End/{id}": {
             "post": {
                 "tags": [
-                    "Admin/Rent"
+                    "Admin"
                 ],
                 "description": "Завершение аренды транспорта по id аренды\n\u003cbr\u003e",
                 "operationId": "AdminRentController.End",
@@ -406,14 +409,16 @@
                     {
                         "in": "query",
                         "name": "lat",
-                        "description": "false",
+                        "description": "Географическая широта местонахождения транспорта",
+                        "required": true,
                         "type": "number",
                         "format": "double"
                     },
                     {
                         "in": "query",
                         "name": "long",
-                        "description": "false",
+                        "description": "Географическая долгота местонахождения транспорта",
+                        "required": true,
                         "type": "number",
                         "format": "double"
                     }
@@ -422,7 +427,7 @@
                     "200": {
                         "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
-                            "$ref": "#/definitions/models.Rent"
+                            "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
                     "400": {
@@ -442,45 +447,10 @@
                 ]
             }
         },
-        "/Admin/Rent/Rent/{id}": {
-            "post": {
-                "tags": [
-                    "Admin/Rent"
-                ],
-                "description": "Удаление информации об аренде по id\n\u003cbr\u003e",
-                "operationId": "AdminRentController.Delete",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "rentId",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": ""
-                    },
-                    "400": {
-                        "description": ":id is empty"
-                    },
-                    "401": {
-                        "description": "unauthorized"
-                    }
-                },
-                "security": [
-                    {
-                        "api_key": []
-                    }
-                ]
-            }
-        },
-        "/Admin/Rent/Rent/{rentId}": {
+        "/Admin/Rent/{id}": {
             "get": {
                 "tags": [
-                    "Admin/Rent"
+                    "Admin"
                 ],
                 "description": "Получение информации об аренде по id\n\u003cbr\u003e",
                 "operationId": "AdminRentController.Get",
@@ -498,47 +468,6 @@
                     "200": {
                         "description": "",
                         "schema": {
-                            "$ref": "#/definitions/models.Rent"
-                        }
-                    },
-                    "400": {
-                        "description": ":id is empty"
-                    },
-                    "401": {
-                        "description": "unauthorized"
-                    },
-                    "404": {
-                        "description": "not found"
-                    }
-                },
-                "security": [
-                    {
-                        "api_key": []
-                    }
-                ]
-            }
-        },
-        "/Admin/Rent/TransportHistory/{transportId}": {
-            "get": {
-                "tags": [
-                    "Admin/Rent"
-                ],
-                "description": "Получение истории аренд транспорта с id={transportId}\n\u003cbr\u003e",
-                "operationId": "AdminRentController.TransportHistory",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "transportId",
-                        "description": "transportId",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Список из указанных объектов может быть получен по ключу data",
-                        "schema": {
                             "$ref": "#/definitions/responses.RentResponse"
                         }
                     },
@@ -557,31 +486,26 @@
                         "api_key": []
                     }
                 ]
-            }
-        },
-        "/Admin/Rent/UserHistory/{userId}": {
-            "get": {
+            },
+            "post": {
                 "tags": [
-                    "Admin/Rent"
+                    "Admin"
                 ],
-                "description": "Получение истории аренд пользователя с id={userId}\n\u003cbr\u003e",
-                "operationId": "AdminRentController.UserHistory",
+                "description": "Удаление информации об аренде по id\n\u003cbr\u003e",
+                "operationId": "AdminRentController.Delete",
                 "parameters": [
                     {
                         "in": "path",
-                        "name": "userId",
-                        "description": "userId",
+                        "name": "id",
+                        "description": "rentId",
                         "required": true,
                         "type": "integer",
                         "format": "int64"
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Список из указанных объектов может быть получен по ключу data",
-                        "schema": {
-                            "$ref": "#/definitions/responses.RentResponse"
-                        }
+                    "201": {
+                        "description": ""
                     },
                     "400": {
                         "description": ":id is empty"
@@ -804,6 +728,88 @@
                 ]
             }
         },
+        "/Admin/TransportHistory/{id}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "description": "Получение истории аренд транспорта с id={transportId}\n\u003cbr\u003e",
+                "operationId": "AdminRentController.TransportHistory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "transportId",
+                        "description": "transportId",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список из указанных объектов может быть получен по ключу data",
+                        "schema": {
+                            "$ref": "#/definitions/responses.RentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": ":id is empty"
+                    },
+                    "401": {
+                        "description": "unauthorized"
+                    },
+                    "404": {
+                        "description": "not found"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
+        "/Admin/UserHistory/{id}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "description": "Получение истории аренд пользователя с id={userId}\n\u003cbr\u003e",
+                "operationId": "AdminRentController.UserHistory",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "userId",
+                        "description": "userId",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Список из указанных объектов может быть получен по ключу data",
+                        "schema": {
+                            "$ref": "#/definitions/responses.RentResponse"
+                        }
+                    },
+                    "400": {
+                        "description": ":id is empty"
+                    },
+                    "401": {
+                        "description": "unauthorized"
+                    },
+                    "404": {
+                        "description": "not found"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            }
+        },
         "/Payment/Hesoyam/{id}": {
             "post": {
                 "tags": [
@@ -822,8 +828,11 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": ""
+                    },
+                    "400": {
+                        "description": ":id is empty"
                     },
                     "401": {
                         "description": "unauthorized"
@@ -874,7 +883,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "Указанный объект может быть получен по ключу data",
+                        "schema": {
+                            "$ref": "#/definitions/responses.RentResponse"
+                        }
                     },
                     "400": {
                         "description": ":id is empty"
@@ -944,7 +956,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "",
+                        "description": "Указанный объект может быть получен по ключу data",
                         "schema": {
                             "$ref": "#/definitions/responses.RentResponse"
                         }
@@ -1284,9 +1296,21 @@
                 "Password": {
                     "type": "string"
                 },
+                "Rents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Rent"
+                    }
+                },
                 "Status": {
                     "type": "integer",
                     "format": "int64"
+                },
+                "Transports": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Transport"
+                    }
                 },
                 "Type": {
                     "type": "integer",
@@ -1465,28 +1489,28 @@
             "title": "AdminRentWriteRequest",
             "type": "object",
             "properties": {
-                "FinalPrice": {
+                "finalPrice": {
                     "type": "number",
                     "format": "double"
                 },
-                "PriceOfUnit": {
+                "priceOfUnit": {
                     "type": "number",
                     "format": "double"
                 },
-                "PriceType": {
+                "priceType": {
                     "type": "string"
                 },
-                "TimeEnd": {
+                "timeEnd": {
                     "type": "string"
                 },
-                "TimeStart": {
+                "timeStart": {
                     "type": "string"
                 },
-                "TransportId": {
+                "transportId": {
                     "type": "integer",
                     "format": "int64"
                 },
-                "UserId": {
+                "userId": {
                     "type": "integer",
                     "format": "int64"
                 }
@@ -1794,7 +1818,7 @@
             "description": "AdminTransportController operations for /Admin/Transport\n"
         },
         {
-            "name": "Admin/Rent",
+            "name": "Admin",
             "description": "AdminRentController operations for /Admin/Rent\n"
         }
     ]

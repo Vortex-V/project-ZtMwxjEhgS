@@ -228,10 +228,10 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Admin/Rent/Rent:
+  /Admin/Rent:
     post:
       tags:
-      - Admin/Rent
+      - Admin
       description: |-
         Создание новой аренды
         <br>
@@ -239,24 +239,53 @@ paths:
       parameters:
       - in: body
         name: body
-        description: info
+        description: rent info
         schema:
           $ref: '#/definitions/requests.AdminRentWriteRequest'
       responses:
         "200":
           description: Указанный объект может быть получен по ключу data
           schema:
-            $ref: '#/definitions/models.Rent'
+            $ref: '#/definitions/responses.RentResponse'
         "400":
           description: body is invalid
         "401":
           description: unauthorized
+        "404":
+          description: not found
       security:
       - api_key: []
-  /Admin/Rent/Rent/{id}:
+  /Admin/Rent/{id}:
+    get:
+      tags:
+      - Admin
+      description: |-
+        Получение информации об аренде по id
+        <br>
+      operationId: AdminRentController.Get
+      parameters:
+      - in: path
+        name: rentId
+        description: rentId
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: :id is empty
+        "401":
+          description: unauthorized
+        "404":
+          description: not found
+      security:
+      - api_key: []
     post:
       tags:
-      - Admin/Rent
+      - Admin
       description: |-
         Удаление информации об аренде по id
         <br>
@@ -275,40 +304,14 @@ paths:
           description: :id is empty
         "401":
           description: unauthorized
-      security:
-      - api_key: []
-  /Admin/Rent/Rent/{rentId}:
-    get:
-      tags:
-      - Admin/Rent
-      description: |-
-        Получение информации об аренде по id
-        <br>
-      operationId: AdminRentController.Get
-      parameters:
-      - in: path
-        name: rentId
-        description: rentId
-        required: true
-        type: integer
-        format: int64
-      responses:
-        "200":
-          description: ""
-          schema:
-            $ref: '#/definitions/models.Rent'
-        "400":
-          description: :id is empty
-        "401":
-          description: unauthorized
         "404":
           description: not found
       security:
       - api_key: []
-  /Admin/Rent/Rent/End/{rentId}:
+  /Admin/Rent/End/{id}:
     post:
       tags:
-      - Admin/Rent
+      - Admin
       description: |-
         Завершение аренды транспорта по id аренды
         <br>
@@ -322,73 +325,19 @@ paths:
         format: int64
       - in: query
         name: lat
-        description: "false"
+        description: Географическая широта местонахождения транспорта
+        required: true
         type: number
         format: double
       - in: query
         name: long
-        description: "false"
+        description: Географическая долгота местонахождения транспорта
+        required: true
         type: number
         format: double
       responses:
         "200":
           description: Указанный объект может быть получен по ключу data
-          schema:
-            $ref: '#/definitions/models.Rent'
-        "400":
-          description: :id is empty
-        "401":
-          description: unauthorized
-        "404":
-          description: not found
-      security:
-      - api_key: []
-  /Admin/Rent/TransportHistory/{transportId}:
-    get:
-      tags:
-      - Admin/Rent
-      description: |-
-        Получение истории аренд транспорта с id={transportId}
-        <br>
-      operationId: AdminRentController.TransportHistory
-      parameters:
-      - in: path
-        name: transportId
-        description: transportId
-        required: true
-        type: integer
-        format: int64
-      responses:
-        "200":
-          description: Список из указанных объектов может быть получен по ключу data
-          schema:
-            $ref: '#/definitions/responses.RentResponse'
-        "400":
-          description: :id is empty
-        "401":
-          description: unauthorized
-        "404":
-          description: not found
-      security:
-      - api_key: []
-  /Admin/Rent/UserHistory/{userId}:
-    get:
-      tags:
-      - Admin/Rent
-      description: |-
-        Получение истории аренд пользователя с id={userId}
-        <br>
-      operationId: AdminRentController.UserHistory
-      parameters:
-      - in: path
-        name: userId
-        description: userId
-        required: true
-        type: integer
-        format: int64
-      responses:
-        "200":
-          description: Список из указанных объектов может быть получен по ключу data
           schema:
             $ref: '#/definitions/responses.RentResponse'
         "400":
@@ -539,6 +488,62 @@ paths:
           description: unauthorized
       security:
       - api_key: []
+  /Admin/TransportHistory/{id}:
+    get:
+      tags:
+      - Admin
+      description: |-
+        Получение истории аренд транспорта с id={transportId}
+        <br>
+      operationId: AdminRentController.TransportHistory
+      parameters:
+      - in: path
+        name: transportId
+        description: transportId
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: Список из указанных объектов может быть получен по ключу data
+          schema:
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: :id is empty
+        "401":
+          description: unauthorized
+        "404":
+          description: not found
+      security:
+      - api_key: []
+  /Admin/UserHistory/{id}:
+    get:
+      tags:
+      - Admin
+      description: |-
+        Получение истории аренд пользователя с id={userId}
+        <br>
+      operationId: AdminRentController.UserHistory
+      parameters:
+      - in: path
+        name: userId
+        description: userId
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: Список из указанных объектов может быть получен по ключу data
+          schema:
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: :id is empty
+        "401":
+          description: unauthorized
+        "404":
+          description: not found
+      security:
+      - api_key: []
   /Payment/Hesoyam/{id}:
     post:
       tags:
@@ -555,8 +560,10 @@ paths:
         type: integer
         format: int64
       responses:
-        "201":
+        "200":
           description: ""
+        "400":
+          description: :id is empty
         "401":
           description: unauthorized
         "404":
@@ -620,7 +627,9 @@ paths:
         format: double
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
+          schema:
+            $ref: '#/definitions/responses.RentResponse'
         "400":
           description: :id is empty
         "401":
@@ -668,7 +677,7 @@ paths:
         type: string
       responses:
         "200":
-          description: ""
+          description: Указанный объект может быть получен по ключу data
           schema:
             $ref: '#/definitions/responses.RentResponse'
         "400":
@@ -872,9 +881,17 @@ definitions:
         type: boolean
       Password:
         type: string
+      Rents:
+        type: array
+        items:
+          $ref: '#/definitions/models.Rent'
       Status:
         type: integer
         format: int64
+      Transports:
+        type: array
+        items:
+          $ref: '#/definitions/models.Transport'
       Type:
         type: integer
         format: int64
@@ -999,22 +1016,22 @@ definitions:
     title: AdminRentWriteRequest
     type: object
     properties:
-      FinalPrice:
+      finalPrice:
         type: number
         format: double
-      PriceOfUnit:
+      priceOfUnit:
         type: number
         format: double
-      PriceType:
+      priceType:
         type: string
-      TimeEnd:
+      timeEnd:
         type: string
-      TimeStart:
+      timeStart:
         type: string
-      TransportId:
+      transportId:
         type: integer
         format: int64
-      UserId:
+      userId:
         type: integer
         format: int64
   requests.AdminTransportWriteRequest:
@@ -1230,6 +1247,6 @@ tags:
 - name: Admin/Transport
   description: |
     AdminTransportController operations for /Admin/Transport
-- name: Admin/Rent
+- name: Admin
   description: |
     AdminRentController operations for /Admin/Rent
