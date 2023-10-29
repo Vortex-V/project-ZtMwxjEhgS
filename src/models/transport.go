@@ -12,7 +12,7 @@ import (
 type Transport struct {
 	model
 	Id          int64     `orm:"auto;pk"`
-	Account     *Account  `orm:"column(account_id);rel(one)"`
+	Account     *Account  `orm:"column(account_id);rel(fk)"`
 	CanBeRented bool      `orm:"" default:"false"`
 	Type        string    `orm:""`
 	Model       string    `orm:""`
