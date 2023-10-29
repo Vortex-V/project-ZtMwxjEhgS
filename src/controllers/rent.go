@@ -15,25 +15,25 @@ type RentController struct {
 // Transport
 // @Title Transport
 // @Description Получение транспорта доступного для аренды по параметрам
-// @Param	lat	query	float64	false	Географическая широта местонахождения транспорта
-// @Param	long	query	float64	false	Географическая долгота местонахождения транспорта
-// @Param	radius	query	float64	false	Радиус круга поиска транспорта
-// @Param	type	query	string	false	Тип транспорта [Car, Bike, Scooter, All]
+// @Param	lat	query	float64	true	"Географическая широта местонахождения транспорта"
+// @Param	long	query	float64	true	"Географическая долгота местонахождения транспорта"
+// @Param	radius	query	float64	true	"Радиус круга поиска транспорта"
+// @Param	type	query	string	true	"Тип транспорта [Car, Bike, Scooter, All]"
 // @Success 200	{object}	responses.TransportResponse
 // @Failure 400 invalid params
 // @Failure 404 not found
 // @router /Transport [get]
 func (c *RentController) Transport() {
-	lat := c.GetString("lat", "")
-	long := c.GetString("long", "")
-	radius := c.GetString("radius", "")
-	transportType := c.GetString("type", "All")
+	form := new(forms.RentTransportForm)
+	if !c.ParseAndValidateQuery(form) {
+		return
+	}
 
-	rowCount, list, err := models.TransportSearch(map[string]string{
-		"type":          models.GetTransportTypeLabel(transportType),
-		"lat":           lat,
-		"long":          long,
-		"radius":        radius,
+	rowCount, list, err := models.TransportSearch(map[string]interface{}{
+		"type":          models.GetTransportType(form.Type),
+		"lat":           form.Lat,
+		"long":          form.Long,
+		"radius":        form.Radius,
 		"can_be_rented": "1",
 	})
 	if err != nil {
@@ -57,7 +57,7 @@ func (c *RentController) Transport() {
 // @Failure 400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /:id [get]
+// @router /:rentId [get]
 func (c *RentController) Get() {
 	id := c.GetIdFormPath()
 	if id == 0 {
@@ -151,7 +151,7 @@ func (c *RentController) TransportHistory() {
 // @Failure 400 invalid params
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /New/:id [post]
+// @router /New/:transportId [post]
 func (c *RentController) New() {
 	accountId := c.GetIdentityId()
 	if accountId == 0 {
@@ -167,7 +167,7 @@ func (c *RentController) New() {
 		return
 	}
 
-	rentType := models.GetRentTypeKeyByLabel(form.RentType)
+	rentType := models.GetRentType(form.RentType)
 	if rentType == "" {
 		c.ResponseError("rentType is invalid", 400)
 		return
@@ -207,7 +207,7 @@ func (c *RentController) New() {
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /End/:id [post]
+// @router /End/:rentId [post]
 func (c *RentController) End() {
 	accountId, err := c.GetInt64("accountId")
 	if err != nil {

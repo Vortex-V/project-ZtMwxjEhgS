@@ -6,32 +6,32 @@ import (
 )
 
 type (
-	AccountSingUpRequest struct {
+	AccountSignUpRequest struct {
 		request
-		Username string `valid:"Required"`
-		Password string `valid:"Required"`
+		Username string `valid:"Required" json:"username"`
+		Password string `valid:"Required" json:"password"`
 	}
 	AccountSignInRequest struct {
 		request
-		Username string `valid:"Required"`
-		Password string `valid:"Required"`
+		Username string `valid:"Required" json:"username"`
+		Password string `valid:"Required" json:"password"`
 	}
 	AccountUpdateRequest struct {
 		request
-		Username string
-		Password string
+		Username string `json:"username"`
+		Password string `json:"password"`
 	}
 
 	AdminAccountWriteRequest struct {
 		request
-		Username string `valid:"Required"`
-		Password string `valid:"Required"`
-		IsAdmin  bool
-		Balance  float64 `valid:"Required"`
+		Username string  `valid:"Required" json:"username"`
+		Password string  `valid:"Required" json:"password"`
+		IsAdmin  bool    `json:"isAdmin"`
+		Balance  float64 `valid:"Required" json:"balance"`
 	}
 )
 
-func (r *AccountSingUpRequest) Valid(v *validation.Validation) {
+func (r *AccountSignUpRequest) Valid(v *validation.Validation) {
 	usernameUniqueRequest(v, r.Username)
 }
 func (r *AccountUpdateRequest) Valid(v *validation.Validation) {

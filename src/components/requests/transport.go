@@ -8,44 +8,44 @@ import (
 type (
 	TransportPostRequest struct {
 		request
-		CanBeRented   bool   `valid:"Required"`
-		TransportType string `valid:"Required"`
-		Model         string `valid:"Required"`
-		Color         string `valid:"Required"`
-		Identifier    string `valid:"Required"`
-		Description   string
-		Latitude      float64 `valid:"Required"`
-		Longitude     float64 `valid:"Required"`
-		MinutePrice   float64
-		DayPrice      float64
+		CanBeRented   bool    `valid:"Required" json:"canBeRented"`
+		TransportType string  `valid:"Required" json:"transportType"`
+		Model         string  `valid:"Required" json:"model"`
+		Color         string  `valid:"Required" json:"color"`
+		Identifier    string  `valid:"Required" json:"identifier"`
+		Description   string  `json:"description"`
+		Latitude      float64 `valid:"Required" json:"latitude"`
+		Longitude     float64 `valid:"Required" json:"longitude"`
+		MinutePrice   float64 `json:"minutePrice"`
+		DayPrice      float64 `json:"dayPrice"`
 	}
 
 	TransportPutRequest struct {
 		request
-		CanBeRented bool   `valid:"Required"`
-		Model       string `valid:"Required"`
-		Color       string `valid:"Required"`
-		Identifier  string `valid:"Required"`
-		Description string
-		Latitude    float64 `valid:"Required"`
-		Longitude   float64 `valid:"Required"`
-		MinutePrice float64
-		DayPrice    float64
+		CanBeRented bool    `valid:"Required" json:"canBeRented"`
+		Model       string  `valid:"Required" json:"model"`
+		Color       string  `valid:"Required" json:"color"`
+		Identifier  string  `valid:"Required" json:"identifier"`
+		Description string  `json:"description"`
+		Latitude    float64 `valid:"Required" json:"latitude"`
+		Longitude   float64 `valid:"Required" json:"longitude"`
+		MinutePrice float64 `json:"minutePrice"`
+		DayPrice    float64 `json:"dayPrice"`
 	}
 
 	AdminTransportWriteRequest struct {
 		request
-		OwnerId       int64  `valid:"Required"`
-		CanBeRented   bool   `valid:"Required"`
-		TransportType string `valid:"Required"`
-		Model         string `valid:"Required"`
-		Color         string `valid:"Required"`
-		Identifier    string `valid:"Required"`
-		Description   string
-		Latitude      float64 `valid:"Required"`
-		Longitude     float64 `valid:"Required"`
-		MinutePrice   float64
-		DayPrice      float64
+		OwnerId       int64   `valid:"Required" json:"ownerId"`
+		CanBeRented   bool    `valid:"Required" json:"canBeRented"`
+		TransportType string  `valid:"Required" json:"transportType"`
+		Model         string  `valid:"Required" json:"model"`
+		Color         string  `valid:"Required" json:"color"`
+		Identifier    string  `valid:"Required" json:"identifier"`
+		Description   string  `json:"description"`
+		Latitude      float64 `valid:"Required" json:"latitude"`
+		Longitude     float64 `valid:"Required" json:"longitude"`
+		MinutePrice   float64 `json:"minutePrice"`
+		DayPrice      float64 `json:"dayPrice"`
 	}
 )
 
@@ -57,7 +57,11 @@ func (t *AdminTransportWriteRequest) Valid(v *validation.Validation) {
 }
 
 func transportTypeExists(v *validation.Validation, transportType string) {
-	if models.GetTransportTypeLabel(transportType) == "" {
-		v.SetError("TransportType", "Тип транспорта должен быть одним из [Car, Bike, Scooter]")
+	if transportType != "All" {
+		transportType = models.GetTransportType(transportType)
+		if transportType == "" {
+			v.SetError("transportType", "transportType должен быть одним из [Car, Bike, All]")
+			return
+		}
 	}
 }

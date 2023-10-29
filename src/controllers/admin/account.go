@@ -90,7 +90,6 @@ func (c *AdminAccountController) Post() {
 
 	account := &models.Account{
 		Username: data.Username,
-		Password: data.Password,
 		Balance:  data.Balance,
 		Type: func() int {
 			if data.IsAdmin {
@@ -99,6 +98,7 @@ func (c *AdminAccountController) Post() {
 			return models.AccountTypeUser
 		}(),
 	}
+	account.Password, _ = auth.HashPassword(data.Password)
 	_, err := models.Insert(account)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
@@ -137,8 +137,9 @@ func (c *AdminAccountController) Put() {
 		return
 	}
 
-	account := &models.Account{
-		Id:       id,
+	account := c.findModel(id)
+
+	account = &models.Account{
 		Username: data.Username,
 		Balance:  data.Balance,
 		Type: func() int {
@@ -147,6 +148,7 @@ func (c *AdminAccountController) Put() {
 			}
 			return models.AccountTypeUser
 		}(),
+		Status: account.Status,
 	}
 	account.Password, _ = auth.HashPassword(data.Password)
 

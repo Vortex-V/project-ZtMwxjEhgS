@@ -49,8 +49,8 @@ func (t *Rent) GetStatusLabel() string {
 
 // TODO сейчас типы сильно перегружены. Если единственным различием останется написание с заглавной, то убрать все эти проверки и хранить только лейблы
 const (
-	RentTypeMinutes = "minutes"
-	RentTypeDays    = "days"
+	RentTypeMinutes = "Minutes"
+	RentTypeDays    = "Days"
 )
 
 var rentTypeLabels = map[string]string{
@@ -70,15 +70,6 @@ func GetRentType(key string) string {
 	}
 }
 
-func GetRentTypeKeyByLabel(label string) string {
-	for k, v := range rentTypeLabels {
-		if v == label {
-			return k
-		}
-	}
-	return ""
-}
-
 func (t *Rent) GetPriceByRentType(key string) float64 {
 	if key == RentTypeMinutes {
 		return t.Transport.MinutePrice
@@ -93,6 +84,7 @@ func (t *Rent) IsRenter(id int64) bool {
 }
 
 func (t *Rent) IsOwner(id int64) bool {
+	_ = Read(t.Transport)
 	return t.Transport.Account.Id == id
 }
 
@@ -107,7 +99,7 @@ func (t *Rent) SetTimeEnd(v string) (err error) {
 }
 
 func (t *Rent) SetType(v string) bool {
-	t.Type = GetRentTypeKeyByLabel(v)
+	t.Type = GetRentType(v)
 	return !(t.Type == "")
 }
 
@@ -135,20 +127,43 @@ func (t *Rent) Create() error {
 }
 
 func (t *Rent) End(params map[string]interface{}) error {
-	t.Transport.Latitude = (params["lat"]).(float64)
-	t.Transport.Longitude = (params["long"]).(float64)
+	_ = Read(t.Transport)
+	_ = Read(t.Transport.Account)
+	_ = Read(t.Account)
 
 	if t.Status != RentStatusActive {
 		return errors.New("нельзя завершить неактивную аренду")
 	}
-
-	t.TimeEnd = time.Now()
+	// TODO Обернуть всё в транзакицю
 	t.calculateFinalPrice()
-	t.Status = RentStatusCompleted
+	if t.Account.Balance < t.FinalPrice {
+		return errors.New("недостаточно средств на счету")
+	}
+	// TODO хотелось бы учитывать комиссию сервиса
+	t.Transport.Account.Balance += t.FinalPrice
+	t.Account.Balance -= t.FinalPrice
+	_, err := o.Update(t.Transport.Account, "Balance")
+	if err != nil {
+		return err
+	}
+	_, err = o.Update(t.Account, "Balance")
+	if err != nil {
+		return err
+	}
+
+	t.Transport.Latitude = (params["lat"]).(float64)
+	t.Transport.Longitude = (params["long"]).(float64)
 	t.Transport.CanBeRented = true
 	// t.Transport.Status = TransportStatusNotRented TODO заместо изменения CanBeRented
+	_, err = o.Update(t.Transport)
+	if err != nil {
+		return err
+	}
 
-	_, err := o.Update(t)
+	t.TimeEnd = time.Now()
+	t.Status = RentStatusCompleted
+
+	_, err = o.Update(t)
 
 	return err
 }
@@ -167,23 +182,23 @@ func RentSearch(params map[string]interface{}) (int64, []*Rent, error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Rent))
 
-	if params["owner_id"] != "" {
+	if params["owner_id"] != nil {
 		ownerId := params["owner_id"].(int64)
-		qs.Filter("transport__account__id", ownerId)
+		qs = qs.Filter("Transport__Account__Id", ownerId)
 	}
 
-	if params["account_id"] != "" {
+	if params["account_id"] != nil {
 		accountId := params["account_id"].(int64)
-		qs.Filter("account__id", accountId)
+		qs = qs.Filter("Account__Id", accountId)
 	}
 
-	if params["transport_id"] != "" {
+	if params["transport_id"] != nil {
 		transportId := params["transport_id"].(int64)
-		qs.Filter("transport__id", transportId)
+		qs = qs.Filter("Transport__Id", transportId)
 	}
 
-	if params["start"] != "" &&
-		params["count"] != "" {
+	if params["start"] != nil &&
+		params["count"] != nil {
 		start := params["start"].(int)
 		count := params["count"].(int)
 		qs = qs.Limit(count, (start-1)*count)

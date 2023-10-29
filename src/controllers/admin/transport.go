@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"app/src/components/forms"
 	"app/src/components/requests"
 	"app/src/components/responses"
 	"app/src/controllers"
@@ -17,20 +18,20 @@ type AdminTransportController struct {
 // @Description Получение списка всех транспортных средств
 // @Security	api_key
 // @Param	start	query	int	1	false	"Начало выборки [применяет offset((start - 1) * count)]"
-// @Param	count	query	int	10	false	"Размер выборки (по умолчанию 10)"
+// @Param	count	query	int	10	false	"Размер выборки"
 // @Param	transportType	query	string	"All"	false	"Тип транспорта [Car, Bike, Scooter, All]"
 // @Success	200	{object}	responses.TransportResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure 401 unauthorized
 // @router / [get]
 func (c *AdminTransportController) GetAll() {
-	start := c.GetString("start", "1")
-	count := c.GetString("count", "10")
-	transportType := c.GetString("transportType", "All")
-
-	rowCount, list, err := models.TransportSearch(map[string]string{
-		"type":  models.GetTransportTypeLabel(transportType),
-		"start": start,
-		"count": count,
+	form := new(forms.TransportGetAllForm)
+	if !c.ParseAndValidateQuery(form) {
+		return
+	}
+	rowCount, list, err := models.TransportSearch(map[string]interface{}{
+		"type":  models.GetTransportType(form.TransportType),
+		"start": form.Start,
+		"count": form.Count,
 	})
 	if err != nil {
 		c.ResponseError(err.Error(), 500)

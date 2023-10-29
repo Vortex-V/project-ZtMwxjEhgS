@@ -39,6 +39,7 @@ func (r *RentResponse) Construct(m models.Model) interface{} {
 		Id:          rent.Id,
 		AccountId:   rent.Account.Id,
 		Type:        models.GetRentType(rent.Type),
+		TransportId: rent.Transport.Id,
 		TimeStart:   rent.TimeStart.Format(time.DateTime),
 		TimeEnd:     rent.TimeEnd.Format(time.DateTime),
 		PriceOfUnit: rent.PriceOfUnit,

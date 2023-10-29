@@ -1,7 +1,7 @@
 package responses
 
 type (
-	AccountSignUpResponse struct {
+	AccountResponse struct {
 		response
 		Id       int64
 		Username string

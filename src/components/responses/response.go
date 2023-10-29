@@ -11,7 +11,7 @@ import (
 // Можно было бы сделать
 //
 /*type Response interface {
-	*AccountMeResponse | *AccountSignUpResponse | и т.д.
+	*AccountMeResponse | *AccountResponse | и т.д.
 }*/
 // но мне удобней указывать имплементацию непосредсвтенно в типе структуры
 type Response interface {

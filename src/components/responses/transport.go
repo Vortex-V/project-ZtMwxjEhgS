@@ -24,7 +24,7 @@ func (r TransportResponse) Construct(m models.Model) interface{} {
 		Id:            transport.Id,
 		OwnerId:       transport.Account.Id,
 		CanBeRented:   transport.CanBeRented,
-		TransportType: transport.Type,
+		TransportType: models.GetTransportType(transport.Type),
 		Model:         transport.Model,
 		Color:         transport.Color,
 		Identifier:    transport.Identifier,

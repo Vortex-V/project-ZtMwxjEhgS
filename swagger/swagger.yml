@@ -13,6 +13,9 @@ paths:
     get:
       tags:
       - Account
+      description: |-
+        получение данных о текущем аккаунте
+        <br>
       operationId: AccountController.Me
       responses:
         "200":
@@ -27,6 +30,9 @@ paths:
     post:
       tags:
       - Account
+      description: |-
+        получение нового jwt токена пользователя
+        <br>
       operationId: AccountController.SignIn
       parameters:
       - in: body
@@ -43,6 +49,9 @@ paths:
     post:
       tags:
       - Account
+      description: |-
+        выход из аккаунта
+        <br>
       operationId: AccountController.SignOut
       responses:
         "200":
@@ -55,24 +64,30 @@ paths:
     post:
       tags:
       - Account
+      description: |-
+        регистрация нового аккаунта
+        <br>
       operationId: AccountController.SignUp
       parameters:
       - in: body
         name: body
         description: sign up request
         schema:
-          $ref: '#/definitions/requests.AccountSingUpRequest'
+          $ref: '#/definitions/requests.AccountSignUpRequest'
       responses:
         "200":
           description: Указанный объект может быть получен по ключу data
           schema:
-            $ref: '#/definitions/responses.AccountSignUpResponse'
+            $ref: '#/definitions/responses.AccountResponse'
         "400":
           description: username already exists
   /Account/Update:
     put:
       tags:
       - Account
+      description: |-
+        обновление своего аккаунта
+        <br>
       operationId: AccountController.Update
       parameters:
       - in: body
@@ -83,6 +98,8 @@ paths:
       responses:
         "200":
           description: ""
+          schema:
+            $ref: '#/definitions/responses.AccountResponse'
         "400":
           description: username already exists
         "401":
@@ -365,7 +382,7 @@ paths:
         default: "1"
       - in: query
         name: count
-        description: Размер выборки (по умолчанию 10)
+        description: Размер выборки
         type: integer
         format: int64
         default: "10"
@@ -570,7 +587,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Rent/{id}:
+  /Rent/{rentId}:
     get:
       tags:
       - Rent
@@ -598,7 +615,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Rent/End/{id}:
+  /Rent/End/{rentId}:
     post:
       tags:
       - Rent
@@ -655,7 +672,7 @@ paths:
           description: unauthorized
       security:
       - api_key: []
-  /Rent/New/{id}:
+  /Rent/New/{transportId}:
     post:
       tags:
       - Rent
@@ -699,22 +716,26 @@ paths:
       parameters:
       - in: query
         name: lat
-        description: "false"
+        description: Географическая широта местонахождения транспорта
+        required: true
         type: number
         format: double
       - in: query
         name: long
-        description: "false"
+        description: Географическая долгота местонахождения транспорта
+        required: true
         type: number
         format: double
       - in: query
         name: radius
-        description: "false"
+        description: Радиус круга поиска транспорта
+        required: true
         type: number
         format: double
       - in: query
         name: type
-        description: "false"
+        description: Тип транспорта [Car, Bike, Scooter, All]
+        required: true
         type: string
       responses:
         "200":
@@ -888,10 +909,6 @@ definitions:
       Status:
         type: integer
         format: int64
-      Transports:
-        type: array
-        items:
-          $ref: '#/definitions/models.Transport'
       Type:
         type: integer
         format: int64
@@ -979,38 +996,38 @@ definitions:
     title: AccountSignInRequest
     type: object
     properties:
-      Password:
+      password:
         type: string
-      Username:
+      username:
         type: string
-  requests.AccountSingUpRequest:
-    title: AccountSingUpRequest
+  requests.AccountSignUpRequest:
+    title: AccountSignUpRequest
     type: object
     properties:
-      Password:
+      password:
         type: string
-      Username:
+      username:
         type: string
   requests.AccountUpdateRequest:
     title: AccountUpdateRequest
     type: object
     properties:
-      Password:
+      password:
         type: string
-      Username:
+      username:
         type: string
   requests.AdminAccountWriteRequest:
     title: AdminAccountWriteRequest
     type: object
     properties:
-      Balance:
+      balance:
         type: number
         format: double
-      IsAdmin:
+      isAdmin:
         type: boolean
-      Password:
+      password:
         type: string
-      Username:
+      username:
         type: string
   requests.AdminRentWriteRequest:
     title: AdminRentWriteRequest
@@ -1038,86 +1055,86 @@ definitions:
     title: AdminTransportWriteRequest
     type: object
     properties:
-      CanBeRented:
+      canBeRented:
         type: boolean
-      Color:
+      color:
         type: string
-      DayPrice:
+      dayPrice:
         type: number
         format: double
-      Description:
+      description:
         type: string
-      Identifier:
+      identifier:
         type: string
-      Latitude:
+      latitude:
         type: number
         format: double
-      Longitude:
+      longitude:
         type: number
         format: double
-      MinutePrice:
+      minutePrice:
         type: number
         format: double
-      Model:
+      model:
         type: string
-      OwnerId:
+      ownerId:
         type: integer
         format: int64
-      TransportType:
+      transportType:
         type: string
   requests.TransportPostRequest:
     title: TransportPostRequest
     type: object
     properties:
-      CanBeRented:
+      canBeRented:
         type: boolean
-      Color:
+      color:
         type: string
-      DayPrice:
+      dayPrice:
         type: number
         format: double
-      Description:
+      description:
         type: string
-      Identifier:
+      identifier:
         type: string
-      Latitude:
+      latitude:
         type: number
         format: double
-      Longitude:
+      longitude:
         type: number
         format: double
-      MinutePrice:
+      minutePrice:
         type: number
         format: double
-      Model:
+      model:
         type: string
-      TransportType:
+      transportType:
         type: string
   requests.TransportPutRequest:
     title: TransportPutRequest
     type: object
     properties:
-      CanBeRented:
+      canBeRented:
         type: boolean
-      Color:
+      color:
         type: string
-      DayPrice:
+      dayPrice:
         type: number
         format: double
-      Description:
+      description:
         type: string
-      Identifier:
+      identifier:
         type: string
-      Latitude:
+      latitude:
         type: number
         format: double
-      Longitude:
+      longitude:
         type: number
         format: double
-      MinutePrice:
+      minutePrice:
         type: number
         format: double
-      Model:
+      model:
         type: string
   requests.request:
     title: request
@@ -1134,8 +1151,8 @@ definitions:
         format: int64
       Username:
         type: string
-  responses.AccountSignUpResponse:
-    title: AccountSignUpResponse
+  responses.AccountResponse:
+    title: AccountResponse
     type: object
     properties:
       Id:

@@ -19,8 +19,8 @@ type Account struct {
 	CreatedAt     time.Time `orm:"column(created_at);type(timestamp without time zone);null;auto_now_add"`
 	UpdatedAt     time.Time `orm:"column(updated_at);type(timestamp without time zone);null;auto_now"`
 
-	Transports []*Transport `orm:"reverse(many)"`
-	Rents      []*Rent      `orm:"reverse(many)"`
+	// Transports []*Transport `orm:"reverse(many)"`
+	Rents []*Rent `orm:"reverse(many)"`
 }
 
 func (m *Account) TableName() string {

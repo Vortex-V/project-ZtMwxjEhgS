@@ -20,9 +20,8 @@ type TransportController struct {
 // @Failure 404 not found
 // @router /:id [get]
 func (c *TransportController) Get() {
-	id, _ := c.GetInt64(":id", 0)
+	id := c.GetIdFormPath()
 	if id == 0 {
-		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
 	transport := c.findModel(id)
@@ -42,9 +41,8 @@ func (c *TransportController) Get() {
 // @Failure 401 unauthorized
 // @router / [post]
 func (c *TransportController) Post() {
-	id, err := c.GetInt64("accountId")
-	if err != nil {
-		c.ResponseError(ErrorBadRequest, 500)
+	id := c.GetIdentityId()
+	if id == 0 {
 		return
 	}
 
@@ -56,7 +54,6 @@ func (c *TransportController) Post() {
 	transport := &models.Transport{
 		Account:     &models.Account{Id: id},
 		CanBeRented: data.CanBeRented,
-		Type:        data.TransportType,
 		Model:       data.Model,
 		Color:       data.Color,
 		Identifier:  data.Identifier,
@@ -67,7 +64,12 @@ func (c *TransportController) Post() {
 		DayPrice:    data.DayPrice,
 	}
 
-	_, err = models.Insert(transport)
+	if !transport.SetTransportType(data.TransportType) {
+		c.ResponseError("Неверный тип транспорта", 400)
+		return
+	}
+
+	_, err := models.Insert(transport)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
@@ -92,14 +94,12 @@ func (c *TransportController) Post() {
 // @Failure 404 not found
 // @router /:id [put]
 func (c *TransportController) Put() {
-	accountId, err := c.GetInt64("accountId")
-	if err != nil {
-		c.ResponseError(ErrorBadRequest, 500)
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
 		return
 	}
-	id, _ := c.GetInt64(":id", 0)
+	id := c.GetIdFormPath()
 	if id == 0 {
-		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
 
@@ -117,6 +117,7 @@ func (c *TransportController) Put() {
 
 	transport = &models.Transport{
 		Id:          id,
+		Account:     transport.Account,
 		CanBeRented: data.CanBeRented,
 		Model:       data.Model,
 		Color:       data.Color,
@@ -128,7 +129,7 @@ func (c *TransportController) Put() {
 		DayPrice:    data.DayPrice,
 	}
 
-	_, err = models.Update(transport)
+	_, err := models.Update(transport)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
@@ -150,14 +151,12 @@ func (c *TransportController) Put() {
 // @Failure 404 not found
 // @router /:id [delete]
 func (c *TransportController) Delete() {
-	accountId, err := c.GetInt64("accountId")
-	if err != nil {
-		c.ResponseError(ErrorBadRequest, 500)
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
 		return
 	}
-	id, _ := c.GetInt64(":id", 0)
+	id := c.GetIdFormPath()
 	if id == 0 {
-		c.ResponseError(ErrorBadRequest, 400)
 		return
 	}
 
@@ -168,7 +167,7 @@ func (c *TransportController) Delete() {
 		return
 	}
 
-	_, err = models.Delete(transport)
+	_, err := models.Delete(transport)
 	if err != nil {
 		return
 	}

@@ -9,6 +9,7 @@ import (
 func Transport() *web.Namespace {
 	controller := &controllers.TransportController{}
 	web.InsertFilter("/api/Transport/", web.BeforeRouter, routeHelpers.AuthFilter)
+	web.InsertFilter("/api/Transport/:id:int", web.BeforeRouter, routeHelpers.TransportAuthFilter)
 	return web.NewNamespace("/Transport").
 		Router("/:id:int", controller,
 			"get:Get;"+

@@ -1,9 +1,7 @@
 package models
 
 import (
-	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/beego/beego/v2/client/orm"
@@ -39,40 +37,33 @@ func (t *Transport) IsOwner(id int64) bool {
 	return t.Account.Id == id
 }
 
-// TODO сейчас типы сильно перегружены. Если единственным различием останется написание с заглавной, то убрать все эти проверки и хранить только лейблы
 const (
-	TransportTypeCar     = "car"
-	TransportTypeBike    = "bike"
-	TransportTypeScooter = "scooter"
+	TransportTypeCar     = "Car"
+	TransportTypeBike    = "Bike"
+	TransportTypeScooter = "Scooter"
 )
 
-var transportTypeLabels = map[string]string{
+var transportTypes = map[string]string{
 	TransportTypeCar:     "Car",
 	TransportTypeBike:    "Bike",
 	TransportTypeScooter: "Scooter",
 }
 
-func GetTransportTypeLabel(key string) string {
-	if v, ok := transportTypeLabels[key]; ok {
+func GetTransportType(key string) string {
+	if v, ok := transportTypes[key]; ok {
 		return v
 	} else {
 		return ""
 	}
 }
 
-func GetTransportTypeKeyByLabel(label string) string {
-	for k, v := range transportTypeLabels {
-		if v == label {
-			return k
-		}
-	}
-	return ""
-}
-
-func (t *Transport) SetTransportType(key string) {
-	if v, ok := transportTypeLabels[key]; ok {
+func (t *Transport) SetTransportType(key string) bool {
+	if v, ok := transportTypes[key]; ok {
 		t.Type = v
+		return true
 	}
+
+	return false
 }
 
 func (t *Transport) Create() error {
@@ -85,19 +76,16 @@ func (t *Transport) Create() error {
 	return err
 }
 
-func TransportSearch(params map[string]string) (int64, []*Transport, error) {
+func TransportSearch(params map[string]interface{}) (int64, []*Transport, error) {
 	o := orm.NewOrm()
 	qs := o.QueryTable(new(Transport))
 
-	if params["lat"] != "" &&
-		params["long"] != "" &&
-		params["radius"] != "" {
-		lat, err := strconv.ParseFloat(params["lat"], 64)
-		long, err := strconv.ParseFloat(params["long"], 64)
-		radius, err := strconv.ParseFloat(params["radius"], 64)
-		if err != nil {
-			return 0, nil, errors.New("lat, long, radius must be float")
-		}
+	if params["lat"] != nil &&
+		params["long"] != nil &&
+		params["radius"] != nil {
+		lat := params["lat"].(float64)
+		long := params["long"].(float64)
+		radius := params["radius"].(float64)
 		// Делаем подзапрос с выборкой id, так как QuerySetter требует указать имя поля, для которого применить фильтр
 		q := Find(new(Transport), "id").
 			Where(fmt.Sprintf("pow(transports.latitude-%f, 2) + pow(transports.longitude-%f,2)<=pow(%f,2)", lat, long, radius)).
@@ -109,21 +97,21 @@ func TransportSearch(params map[string]string) (int64, []*Transport, error) {
 
 	}
 
-	if params["type"] != "" && params["type"] != "All" {
-		qs = qs.Filter("type", params["type"])
+	if params["type"] != nil {
+		transportType := params["type"].(string)
+		if transportType != "" {
+			qs = qs.Filter("type", transportType)
+		}
 	}
 
-	if params["can_be_rented"] != "" && params["can_be_rented"] != "All" {
+	if params["can_be_rented"] != nil {
 		qs = qs.Filter("can_be_rented", params["can_be_rented"] == "1")
 	}
 
-	if params["start"] != "" &&
-		params["count"] != "" {
-		start, err := strconv.ParseInt(params["start"], 10, 64)
-		count, err := strconv.ParseInt(params["count"], 10, 64)
-		if err != nil {
-			return 0, nil, errors.New("start, count must be int")
-		}
+	if params["start"] != nil &&
+		params["count"] != nil {
+		start := params["start"].(int64)
+		count := params["count"].(int64)
 		qs = qs.Limit(count, (start-1)*count)
 	}
 
