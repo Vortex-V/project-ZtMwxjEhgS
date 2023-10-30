@@ -59,7 +59,7 @@ func AdminFilter(ctx *context.Context) {
 	}
 }
 
-// TransportAuthFilter Костыль, чтобы пропускал GET для транспорта
+// TransportAuthFilter Костыль, чтобы пропускал аутентификацию для GET /:id у транспорта
 func TransportAuthFilter(ctx *context.Context) {
 	if ctx.Request.Method != "GET" {
 		AuthFilter(ctx)

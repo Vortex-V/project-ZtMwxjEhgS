@@ -104,13 +104,6 @@ func (t *Rent) SetType(v string) bool {
 }
 
 func (t *Rent) Create() error {
-	if t.IsOwner(t.Account.Id) {
-		return errors.New("нельзя арендовать свой транспорт")
-	}
-	if !t.Transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
-		return errors.New("транспорт уже арендован")
-	}
-
 	if t.PriceOfUnit == 0 {
 		t.PriceOfUnit = t.GetPriceByRentType(t.Type)
 	}

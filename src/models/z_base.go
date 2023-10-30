@@ -1,6 +1,7 @@
 package models
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/core/logs"
@@ -91,4 +92,12 @@ func Find(model Model, selectFields ...string) orm.QueryBuilder {
 		Call([]reflect.Value{})[0].
 		String()
 	return qb.Select(selectFields...).From(tableName)
+}
+
+func FillFields(dst Model, src interface{}) error {
+	tmpStr, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(tmpStr, dst)
 }

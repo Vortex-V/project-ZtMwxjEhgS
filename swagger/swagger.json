@@ -387,6 +387,9 @@
                     "401": {
                         "description": "unauthorized"
                     },
+                    "403": {
+                        "description": "forbidden"
+                    },
                     "404": {
                         "description": "not found"
                     }
@@ -975,6 +978,9 @@
                     "401": {
                         "description": "unauthorized"
                     },
+                    "403": {
+                        "description": "forbidden"
+                    },
                     "404": {
                         "description": "not found"
                     }
@@ -1125,6 +1131,32 @@
             }
         },
         "/Transport/": {
+            "get": {
+                "tags": [
+                    "Transport"
+                ],
+                "description": "Список транспорта, которым владеет пользователь\n\u003cbr\u003e",
+                "operationId": "TransportController.GetAll",
+                "responses": {
+                    "200": {
+                        "description": "Список указанных объеков может быть получен по ключу data",
+                        "schema": {
+                            "$ref": "#/definitions/responses.TransportResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "unauthorized"
+                    },
+                    "404": {
+                        "description": "not found"
+                    }
+                },
+                "security": [
+                    {
+                        "api_key": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Transport"

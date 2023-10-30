@@ -107,6 +107,7 @@ func (c *AdminRentController) TransportHistory() {
 // @Success 200 {object}	responses.RentResponse	Указанный объект может быть получен по ключу data
 // @Failure	400	body is invalid
 // @Failure 401 unauthorized
+// @Failure 403 forbidden
 // @Failure 404 not found
 // @router /Rent [post]
 func (c *AdminRentController) Post() {
@@ -127,12 +128,12 @@ func (c *AdminRentController) Post() {
 	}
 	err := rent.SetTimeStart(data.TimeStart)
 	if err != nil {
-		c.ResponseError(err.Error(), 400)
+		c.ResponseError("timeStart is invalid", 400)
 		return
 	}
 	err = rent.SetTimeEnd(data.TimeEnd)
 	if err != nil {
-		c.ResponseError(err.Error(), 400)
+		c.ResponseError("timeEnd is invalid", 400)
 		return
 	}
 	err = models.Read(rent.Transport)
@@ -140,7 +141,14 @@ func (c *AdminRentController) Post() {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return
 	}
-
+	if rent.IsOwner(rent.Account.Id) {
+		c.ResponseError("Нельзя арендовать свой транспорт", 403)
+		return
+	}
+	if !rent.Transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
+		c.ResponseError("Транспорт уже арендован", 403)
+		return
+	}
 	err = rent.Create()
 	if err != nil {
 		c.ResponseError(err.Error(), 500)

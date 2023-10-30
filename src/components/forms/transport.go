@@ -1,7 +1,7 @@
 package forms
 
 import (
-	"app/src/models"
+	"app/src/components/customValid"
 	"github.com/beego/beego/v2/core/validation"
 )
 
@@ -13,15 +13,5 @@ type TransportGetAllForm struct {
 }
 
 func (f *TransportGetAllForm) Valid(v *validation.Validation) {
-	transportTypeExists(v, f.TransportType)
-}
-
-func transportTypeExists(v *validation.Validation, transportType string) {
-	if transportType != "All" {
-		transportType = models.GetTransportType(transportType)
-		if transportType == "" {
-			v.SetError("transportType", "transportType должен быть одним из [Car, Bike, All]")
-			return
-		}
-	}
+	customValid.TransportTypeExists(v, f.TransportType)
 }

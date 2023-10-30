@@ -75,3 +75,5 @@ alter table rental
         foreign key (transport_id) references transports
             on update cascade on delete cascade;
 
+INSERT INTO accounts (username, password, type, status, is_need_relogin, balance)
+VALUES ('admin', 'admin', 1, 1, false, 300000);

@@ -16,5 +16,5 @@ func Transport() *web.Namespace {
 				"put:Put;"+
 				"delete:Delete",
 		).
-		Router("/", controller, "post:Post")
+		Router("/", controller, "get:GetAll;post:Post")
 }

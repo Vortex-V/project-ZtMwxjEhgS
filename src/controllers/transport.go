@@ -144,21 +144,14 @@ func (c *TransportController) Put() {
 		return
 	}
 
-	transport = &models.Transport{
-		Id:          id,
-		Account:     transport.Account,
-		CanBeRented: data.CanBeRented,
-		Model:       data.Model,
-		Color:       data.Color,
-		Identifier:  data.Identifier,
-		Description: data.Description,
-		Latitude:    data.Latitude,
-		Longitude:   data.Longitude,
-		MinutePrice: data.MinutePrice,
-		DayPrice:    data.DayPrice,
+	// Нехороший код, да и негибкий
+	err := models.FillFields(transport, data)
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
 	}
 
-	_, err := models.Update(transport)
+	_, err = models.Update(transport)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return

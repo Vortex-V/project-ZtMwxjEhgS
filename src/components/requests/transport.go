@@ -1,7 +1,7 @@
 package requests
 
 import (
-	"app/src/models"
+	"app/src/components/customValid"
 	"github.com/beego/beego/v2/core/validation"
 )
 
@@ -50,18 +50,8 @@ type (
 )
 
 func (t *TransportPostRequest) Valid(v *validation.Validation) {
-	transportTypeExists(v, t.TransportType)
+	customValid.TransportTypeExists(v, t.TransportType)
 }
 func (t *AdminTransportWriteRequest) Valid(v *validation.Validation) {
-	transportTypeExists(v, t.TransportType)
-}
-
-func transportTypeExists(v *validation.Validation, transportType string) {
-	if transportType != "All" {
-		transportType = models.GetTransportType(transportType)
-		if transportType == "" {
-			v.SetError("transportType", "transportType должен быть одним из [Car, Bike, All]")
-			return
-		}
-	}
+	customValid.TransportTypeExists(v, t.TransportType)
 }

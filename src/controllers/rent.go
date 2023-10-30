@@ -59,6 +59,10 @@ func (c *RentController) Transport() {
 // @Failure 404 not found
 // @router /:rentId [get]
 func (c *RentController) Get() {
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
+		return
+	}
 	id := c.GetIdFormPath()
 	if id == 0 {
 		return
@@ -66,7 +70,7 @@ func (c *RentController) Get() {
 
 	rent := c.findModel(id)
 
-	if rent.IsOwner(id) || rent.IsRenter(id) {
+	if !rent.IsOwner(accountId) || !rent.IsRenter(accountId) {
 		c.ResponseError("Нет прав для получения данных", 403)
 		return
 	}
@@ -124,6 +128,18 @@ func (c *RentController) TransportHistory() {
 		return
 	}
 
+	var transport = &models.Transport{Id: transportId}
+	err := models.Read(transport)
+	if err != nil {
+		c.ResponseError(ErrorNotFound, 404)
+		return
+	}
+
+	if !transport.IsOwner(accountId) {
+		c.ResponseError("Нет прав для получения данных", 403)
+		return
+	}
+
 	rowCount, list, err := models.RentSearch(map[string]interface{}{
 		"owner_id":     accountId,
 		"transport_id": transportId,
@@ -150,6 +166,7 @@ func (c *RentController) TransportHistory() {
 // @Failure 400 :id is empty
 // @Failure 400 invalid params
 // @Failure 401 unauthorized
+// @Failure 403 forbidden
 // @Failure 404 not found
 // @router /New/:transportId [post]
 func (c *RentController) New() {
@@ -183,6 +200,14 @@ func (c *RentController) New() {
 	err := models.Read(rent.Transport)
 	if err != nil {
 		c.ResponseError(ErrorNotFound, 404)
+		return
+	}
+	if rent.IsOwner(rent.Account.Id) {
+		c.ResponseError("Нельзя арендовать свой транспорт", 403)
+		return
+	}
+	if !rent.Transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
+		c.ResponseError("Транспорт уже арендован", 403)
 		return
 	}
 	err = rent.Create()

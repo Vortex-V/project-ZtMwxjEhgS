@@ -114,8 +114,8 @@ func TransportSearch(params map[string]interface{}) (int64, []*Transport, error)
 
 	if params["start"] != nil &&
 		params["count"] != nil {
-		start := params["start"].(int64)
-		count := params["count"].(int64)
+		start := params["start"].(int)
+		count := params["count"].(int)
 		qs = qs.Limit(count, (start-1)*count)
 	}
 
