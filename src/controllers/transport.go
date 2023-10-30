@@ -31,6 +31,35 @@ func (c *TransportController) Get() {
 	c.Response(response)
 }
 
+// GetAll
+// @Title GetAll
+// @Security	api_key
+// @Description Список транспорта, которым владеет пользователь
+// @Success 200 {object} responses.TransportResponse	Список указанных объеков может быть получен по ключу data
+// @Failure 401 unauthorized
+// @Failure 404 not found
+// @router / [get]
+func (c *TransportController) GetAll() {
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
+		return
+	}
+
+	rowCount, list, err := models.TransportSearch(map[string]interface{}{
+		"account_id": accountId,
+	})
+	if err != nil {
+		c.ResponseError(err.Error(), 500)
+		return
+	}
+
+	collection := responses.Collection[*responses.TransportResponse, *models.Transport](
+		new(responses.TransportResponse), list)
+	c.Response(collection, DataMap{
+		"count": rowCount,
+	})
+}
+
 // Post
 // @Title Post
 // @Description Добавление нового транспорта

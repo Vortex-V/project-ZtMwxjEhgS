@@ -108,6 +108,10 @@ func TransportSearch(params map[string]interface{}) (int64, []*Transport, error)
 		qs = qs.Filter("can_be_rented", params["can_be_rented"] == "1")
 	}
 
+	if params["account_id"] != nil {
+		qs = qs.Filter("account_id", params["account_id"])
+	}
+
 	if params["start"] != nil &&
 		params["count"] != nil {
 		start := params["start"].(int64)
