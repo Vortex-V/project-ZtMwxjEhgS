@@ -176,9 +176,18 @@ func (c *AdminAccountController) Put() {
 // @Failure 404 not found
 // @router /:id [delete]
 func (c *AdminAccountController) Delete() {
+	accountId := c.GetIdentityId()
+	if accountId == 0 {
+		return
+	}
 	id, _ := c.GetInt64(":id", 0)
 	if id == 0 {
 		c.ResponseError(controllers.ErrorBadRequest, 400)
+		return
+	}
+
+	if accountId == id {
+		c.ResponseError("Нельзя удалять собственный аккаунт", 403)
 		return
 	}
 
