@@ -148,10 +148,12 @@ func (c *AdminRentController) Post() {
 		return
 	}
 	// Передаём rent.Account.Id, так как создаётся аренда от лица этого пользователя
-	if err := rent.CanRent(rent.Account.Id, rent.Transport); err != nil {
-		c.ResponseError(err.Error(), 403)
-		return
-	}
+	/*
+		Админ не должен иметь ограничений, поэтому отключил проверку
+		if err := rent.CanRent(rent.Account.Id, rent.Transport); err != nil {
+			c.ResponseError(err.Error(), 403)
+			return
+		}*/
 	err = rent.Create()
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
@@ -220,6 +222,12 @@ func (c *AdminRentController) Put() {
 	}
 
 	rent := c.findModel(rentId)
+
+	/*
+		Админ не должен иметь ограничений, поэтому отключил проверку
+		if rent.IsOwner(data.UserId) {
+			c.ResponseError("нельзя арендовать свой транспорт", 403)
+		}*/
 
 	// TODO Нужно отрефакторить. Это не в контроллере надо делать
 	rent.Account = &models.Account{Id: data.UserId}

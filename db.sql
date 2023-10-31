@@ -76,4 +76,4 @@ alter table rental
             on update cascade on delete cascade;
 
 INSERT INTO accounts (username, password, type, status, is_need_relogin, balance)
-VALUES ('admin', 'admin', 1, 1, false, 300000);
+VALUES ('admin', '$2a$16$0wgQ4IOHv7ZgFtcJFx.JvO6zAk04Jio.eiQPZ2wmm5iM.0VItasY6', 1, 1, false, 300000);

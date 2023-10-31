@@ -167,7 +167,7 @@
                         "name": "start",
                         "description": "Начало выборки [применяет offset((start - 1) * count)]",
                         "type": "integer",
-                        "format": "int64",
+                        "format": "int32",
                         "default": "1"
                     },
                     {
@@ -175,7 +175,7 @@
                         "name": "count",
                         "description": "Размер выборки (по умолчанию 10)",
                         "type": "integer",
-                        "format": "int64",
+                        "format": "int32",
                         "default": "10"
                     }
                 ],
@@ -595,7 +595,7 @@
                         "name": "start",
                         "description": "Начало выборки [применяет offset((start - 1) * count)]",
                         "type": "integer",
-                        "format": "int64",
+                        "format": "int32",
                         "default": "1"
                     },
                     {
@@ -603,7 +603,7 @@
                         "name": "count",
                         "description": "Размер выборки",
                         "type": "integer",
-                        "format": "int64",
+                        "format": "int32",
                         "default": "10"
                     },
                     {

@@ -17,8 +17,8 @@ type AdminTransportController struct {
 // @Title GetAll
 // @Description Получение списка всех транспортных средств
 // @Security	api_key
-// @Param	start	query	int	1	false	"Начало выборки [применяет offset((start - 1) * count)]"
-// @Param	count	query	int	10	false	"Размер выборки"
+// @Param	start	query	int32	1	false	"Начало выборки [применяет offset((start - 1) * count)]"
+// @Param	count	query	int32	10	false	"Размер выборки"
 // @Param	transportType	query	string	"All"	false	"Тип транспорта [Car, Bike, Scooter, All]"
 // @Success	200	{object}	responses.TransportResponse	Список из указанных объектов может быть получен по ключу data
 // @Failure 401 unauthorized

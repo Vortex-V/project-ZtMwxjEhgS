@@ -204,6 +204,8 @@ func (t *Rent) calculateFinalPrice() {
 	case RentTypeMinutes:
 		t.FinalPrice = t.PriceOfUnit * duration.Minutes()
 	}
+	// Сразу обновляем, чтобы пользователь мог посмотреть
+	Update(t, "FinalPrice")
 }
 
 func RentSearch(params map[string]interface{}) (int64, []*Rent, error) {

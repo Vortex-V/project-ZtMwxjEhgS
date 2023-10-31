@@ -18,8 +18,8 @@ type AdminAccountController struct {
 // @Title GetAll
 // @Description	Получение списка всех аккаунтов
 // @Security	api_key
-// @Param	start	query	int	1	false	"Начало выборки [применяет offset((start - 1) * count)]"
-// @Param	count	query	int	10	false	"Размер выборки (по умолчанию 10)"
+// @Param	start	query	int32	1	false	"Начало выборки [применяет offset((start - 1) * count)]"
+// @Param	count	query	int32	10	false	"Размер выборки (по умолчанию 10)"
 // @Success	200	{object}	models.Account	Список из указанных объектов может быть получен по ключу data
 // @Failure 401	unauthorized
 // @router / [get]
