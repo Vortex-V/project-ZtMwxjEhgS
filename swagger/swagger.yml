@@ -274,7 +274,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Admin/Rent/{id}:
+  /Admin/Rent/{rentId}:
     get:
       tags:
       - Admin
@@ -302,7 +302,39 @@ paths:
           description: not found
       security:
       - api_key: []
-    post:
+    put:
+      tags:
+      - Admin
+      description: |-
+        Изменение записи об аренде по id
+        <br>
+      operationId: AdminRentController.Put
+      parameters:
+      - in: path
+        name: rentId
+        description: rentId
+        required: true
+        type: integer
+        format: int64
+      - in: body
+        name: body
+        description: rent info
+        schema:
+          $ref: '#/definitions/requests.AdminRentWriteRequest'
+      responses:
+        "200":
+          description: Указанный объект может быть получен по ключу data
+          schema:
+            $ref: '#/definitions/responses.RentResponse'
+        "400":
+          description: body is invalid
+        "401":
+          description: unauthorized
+        "404":
+          description: not found
+      security:
+      - api_key: []
+    delete:
       tags:
       - Admin
       description: |-
@@ -311,7 +343,7 @@ paths:
       operationId: AdminRentController.Delete
       parameters:
       - in: path
-        name: id
+        name: rentId
         description: rentId
         required: true
         type: integer
@@ -327,7 +359,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Admin/Rent/End/{id}:
+  /Admin/Rent/End/{rentId}:
     post:
       tags:
       - Admin
@@ -507,7 +539,7 @@ paths:
           description: unauthorized
       security:
       - api_key: []
-  /Admin/TransportHistory/{id}:
+  /Admin/TransportHistory/{transportId}:
     get:
       tags:
       - Admin
@@ -535,7 +567,7 @@ paths:
           description: not found
       security:
       - api_key: []
-  /Admin/UserHistory/{id}:
+  /Admin/UserHistory/{userId}:
     get:
       tags:
       - Admin

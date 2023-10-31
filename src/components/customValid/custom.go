@@ -31,7 +31,7 @@ func RentTypeExists(v *validation.Validation, rentType string) {
 	if rentType != "All" {
 		rentType = models.GetRentType(rentType)
 		if rentType == "" {
-			v.SetError("rentType", "rentType должен быть одним из [Days, Minutes, All]")
+			v.SetError("rentType", "rentType должен быть одним из [Days, Minutes]")
 			return
 		}
 	}

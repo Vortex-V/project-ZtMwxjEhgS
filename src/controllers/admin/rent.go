@@ -23,7 +23,7 @@ type AdminRentController struct {
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /Rent/:id [get]
+// @router /Rent/:rentId [get]
 func (c *AdminRentController) Get() {
 	id := c.GetIdFormPath()
 	if id == 0 {
@@ -46,7 +46,7 @@ func (c *AdminRentController) Get() {
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /UserHistory/:id [get]
+// @router /UserHistory/:userId [get]
 func (c *AdminRentController) UserHistory() {
 	id := c.GetIdFormPath()
 	if id == 0 {
@@ -54,6 +54,12 @@ func (c *AdminRentController) UserHistory() {
 	}
 
 	account := &models.Account{Id: id}
+	err := models.Read(account)
+	if err != nil {
+		c.ResponseError(controllers.ErrorNotFound, 404)
+		return
+	}
+
 	rowCount, err := models.LoadRelated(account, "Rents",
 		hints.OrderBy("-Id"))
 	if err != nil {
@@ -77,7 +83,7 @@ func (c *AdminRentController) UserHistory() {
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /TransportHistory/:id [get]
+// @router /TransportHistory/:transportId [get]
 func (c *AdminRentController) TransportHistory() {
 	transportId := c.GetIdFormPath()
 	if transportId == 0 {
@@ -118,30 +124,30 @@ func (c *AdminRentController) Post() {
 
 	rent := &models.Rent{
 		Account:     &models.Account{Id: data.UserId},
+		Type:        models.GetRentType(data.PriceType),
 		Transport:   &models.Transport{Id: data.TransportId},
 		PriceOfUnit: data.PriceOfUnit,
 		FinalPrice:  data.FinalPrice,
-	}
-	if rent.SetType(data.PriceType) {
-		c.ResponseError("rentType is invalid", 400)
-		return
+		Status:      models.RentStatusActive,
 	}
 	err := rent.SetTimeStart(data.TimeStart)
 	if err != nil {
-		c.ResponseError("timeStart is invalid", 400)
+		c.ResponseError("timeStart is invalid (example: 2021-01-01 00:00:00)", 400)
 		return
 	}
-	err = rent.SetTimeEnd(data.TimeEnd)
-	if err != nil {
-		c.ResponseError("timeEnd is invalid", 400)
-		return
+	if data.TimeEnd != "" {
+		err = rent.SetTimeEnd(data.TimeEnd)
+		if err != nil {
+			c.ResponseError("timeEnd is invalid (example: 2021-01-01 00:00:00)", 400)
+			return
+		}
 	}
 	err = models.Read(rent.Transport)
 	if err != nil {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return
 	}
-	// Передаём rent.Account.Id, так как созается аренда для этого пользователя
+	// Передаём rent.Account.Id, так как создаётся аренда от лица этого пользователя
 	if err := rent.CanRent(rent.Account.Id, rent.Transport); err != nil {
 		c.ResponseError(err.Error(), 403)
 		return
@@ -168,7 +174,7 @@ func (c *AdminRentController) Post() {
 // @Failure	400	:id is empty
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /Rent/End/:id [post]
+// @router /Rent/End/:rentId [post]
 func (c *AdminRentController) End() {
 	rentId := c.GetIdFormPath()
 	if rentId == 0 {
@@ -181,10 +187,7 @@ func (c *AdminRentController) End() {
 	if !c.ParseAndValidateQuery(form) {
 		return
 	}
-	err := rent.End(map[string]interface{}{
-		"lat":  form.Lat,
-		"long": form.Long,
-	})
+	err := rent.End(form.Lat, form.Long)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
@@ -199,13 +202,13 @@ func (c *AdminRentController) End() {
 // @Title	Put
 // @Description Изменение записи об аренде по id
 // @Security	api_key
-// @Param	id	path 	int64	true	"rentId"
+// @Param	rentId	path 	int64	true	"rentId"
 // @Param	body	body	requests.AdminRentWriteRequest	"rent info"
 // @Success 200	{object}	responses.RentResponse	Указанный объект может быть получен по ключу data
 // @Failure	400	body is invalid
 // @Failure 401 unauthorized
 // @Failure 404 not found
-// @router /Rent/:id [post]
+// @router /Rent/:rentId [put]
 func (c *AdminRentController) Put() {
 	rentId := c.GetIdFormPath()
 	if rentId == 0 {
@@ -216,30 +219,30 @@ func (c *AdminRentController) Put() {
 		return
 	}
 
-	rent := &models.Rent{
-		Account:     &models.Account{Id: data.UserId},
-		Transport:   &models.Transport{Id: data.TransportId},
-		PriceOfUnit: data.PriceOfUnit,
-		FinalPrice:  data.FinalPrice,
-	}
-	if rent.SetType(data.PriceType) {
-		c.ResponseError("rentType is invalid", 400)
-		return
-	}
+	rent := c.findModel(rentId)
+
+	// TODO Нужно отрефакторить. Это не в контроллере надо делать
+	rent.Account = &models.Account{Id: data.UserId}
+	rent.Type = models.GetRentType(data.PriceType)
+	rent.Transport = &models.Transport{Id: data.TransportId}
+	rent.PriceOfUnit = data.PriceOfUnit
+	rent.FinalPrice = data.FinalPrice
 	err := rent.SetTimeStart(data.TimeStart)
 	if err != nil {
-		c.ResponseError(err.Error(), 400)
+		c.ResponseError("timeStart is invalid (example: 2021-01-01 00:00:00)", 400)
 		return
 	}
-	err = rent.SetTimeEnd(data.TimeEnd)
-	if err != nil {
-		c.ResponseError(err.Error(), 400)
-		return
+	if data.TimeEnd != "" {
+		err = rent.SetTimeEnd(data.TimeEnd)
+		if err != nil {
+			c.ResponseError("timeEnd is invalid (example: 2021-01-01 00:00:00)", 400)
+			return
+		}
 	}
 
 	_, err = models.Update(rent)
 	if err != nil {
-		c.ResponseError(controllers.ErrorNotFound, 404)
+		c.ResponseError(err.Error(), 500)
 		return
 	}
 
@@ -252,12 +255,12 @@ func (c *AdminRentController) Put() {
 // @Title	Delete
 // @Description	Удаление информации об аренде по id
 // @Security	api_key
-// @Param	id	path	int64	true	"rentId"
+// @Param	rentId	path	int64	true	"rentId"
 // @Success 201
 // @Failure	400	:id is empty
 // @Failure 401	unauthorized
 // @Failure 404	not found
-// @router /Rent/:id [post]
+// @router /Rent/:rentId [delete]
 func (c *AdminRentController) Delete() {
 	rentId := c.GetIdFormPath()
 	if rentId == 0 {

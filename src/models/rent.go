@@ -118,11 +118,6 @@ func (t *Rent) SetTimeEnd(v string) (err error) {
 	return err
 }
 
-func (t *Rent) SetType(v string) bool {
-	t.Type = GetRentType(v)
-	return !(t.Type == "")
-}
-
 func (t *Rent) Create() error {
 	tx, _ := o.Begin()
 	defer tx.RollbackUnlessCommit()
@@ -150,7 +145,7 @@ func (t *Rent) Create() error {
 	return tx.Commit()
 }
 
-func (t *Rent) End(params map[string]interface{}) error {
+func (t *Rent) End(lat, long float64) error {
 	transport := t.Transport
 	_ = Read(transport)
 	ownerAccount := transport.Account
@@ -182,8 +177,8 @@ func (t *Rent) End(params map[string]interface{}) error {
 		return err
 	}
 
-	transport.Latitude = (params["lat"]).(float64)
-	transport.Longitude = (params["long"]).(float64)
+	transport.Latitude = lat
+	transport.Longitude = long
 	transport.CanBeRented = true
 	// t.Transport.Status = TransportStatusNotRented TODO заместо изменения CanBeRented
 	_, err = tx.Update(transport)
@@ -231,7 +226,7 @@ func RentSearch(params map[string]interface{}) (int64, []*Rent, error) {
 	}
 
 	if params["start"] != nil &&
-			params["count"] != nil {
+		params["count"] != nil {
 		start := params["start"].(int)
 		count := params["count"].(int)
 		qs = qs.Limit(count, (start-1)*count)

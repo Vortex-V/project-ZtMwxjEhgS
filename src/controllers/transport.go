@@ -144,14 +144,18 @@ func (c *TransportController) Put() {
 		return
 	}
 
-	// Нехороший код, да и негибкий
-	err := models.FillFields(transport, data)
-	if err != nil {
-		c.ResponseError(err.Error(), 500)
-		return
-	}
+	// TODO Нужно отрефакторить. Это не в контроллере надо делать
+	transport.CanBeRented = data.CanBeRented
+	transport.Model = data.Model
+	transport.Color = data.Color
+	transport.Identifier = data.Identifier
+	transport.Description = data.Description
+	transport.Latitude = data.Latitude
+	transport.Longitude = data.Longitude
+	transport.MinutePrice = data.MinutePrice
+	transport.DayPrice = data.DayPrice
 
-	_, err = models.Update(transport)
+	_, err := models.Update(transport)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return

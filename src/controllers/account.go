@@ -81,7 +81,9 @@ func (c *AccountController) SignUp() {
 		return
 	}
 
-	c.ResponseMapTo(new(responses.AccountResponse), account, "Аккаунт успешно создан")
+	response := responses.New[*responses.AccountResponse](
+		new(responses.AccountResponse), account)
+	c.Response(response, "Аккаунт успешно создан")
 }
 
 // SignOut

@@ -8,6 +8,7 @@
 package routers
 
 import (
+	"app/routers/routeHelpers"
 	"app/routers/routes"
 	"app/src/controllers"
 	adminControllers "app/src/controllers/admin"
@@ -17,6 +18,10 @@ import (
 
 func init() {
 	insertCorsFilter()
+	web.ErrorHandler("404", routeHelpers.ErrorNotFound)
+	if web.BConfig.RunMode != web.DEV {
+		web.ErrorHandler("500", routeHelpers.ErrorInternalServerError)
+	}
 
 	var ns *web.Namespace
 

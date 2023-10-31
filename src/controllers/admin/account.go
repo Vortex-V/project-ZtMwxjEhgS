@@ -139,17 +139,15 @@ func (c *AdminAccountController) Put() {
 
 	account := c.findModel(id)
 
-	account = &models.Account{
-		Username: data.Username,
-		Balance:  data.Balance,
-		Type: func() int {
-			if data.IsAdmin {
-				return models.AccountTypeAdmin
-			}
-			return models.AccountTypeUser
-		}(),
-		Status: account.Status,
-	}
+	// TODO Нужно отрефакторить. Это не в контроллере надо делать
+	account.Username = data.Username
+	account.Balance = data.Balance
+	account.Type = func() int {
+		if data.IsAdmin {
+			return models.AccountTypeAdmin
+		}
+		return models.AccountTypeUser
+	}()
 	account.Password, _ = auth.HashPassword(data.Password)
 
 	_, err := models.Update(account)

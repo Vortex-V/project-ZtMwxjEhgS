@@ -1,5 +1,10 @@
 package requests
 
+import (
+	"app/src/components/customValid"
+	"github.com/beego/beego/v2/core/validation"
+)
+
 type (
 	AdminRentWriteRequest struct {
 		request
@@ -12,3 +17,7 @@ type (
 		FinalPrice  float64 `json:"finalPrice"`
 	}
 )
+
+func (r *AdminRentWriteRequest) Valid(v *validation.Validation) {
+	customValid.RentTypeExists(v, r.PriceType)
+}

@@ -4,7 +4,6 @@ import (
 	"app/src/components/forms"
 	"app/src/components/requests"
 	"app/src/components/responses"
-	"app/src/models"
 	"encoding/json"
 	"errors"
 	"github.com/beego/beego/v2/core/validation"
@@ -13,8 +12,8 @@ import (
 )
 
 var (
-	ErrorNotFound     = errors.New("not Found")
-	ErrorBadRequest   = errors.New("bad Request")
+	ErrorNotFound     = errors.New("not found")
+	ErrorBadRequest   = errors.New("bad request")
 	ErrorUnauthorized = errors.New("unauthorized")
 )
 
@@ -78,40 +77,8 @@ func (c *Controller) Response(args ...interface{}) {
 	c.ResponseJson(responseData, status)
 }
 
-// ResponseMapTo Фильтрует models.Model по переданному responses.Response и формирует DataMap
-func (c *Controller) ResponseMapTo(r responses.Response, data ...interface{}) {
-	var (
-		result  = make(DataMap)
-		message string
-		status  int
-	)
-	for _, arg := range data {
-		switch v := arg.(type) {
-		case DataMap:
-			for key, value := range v {
-				result[key] = value
-			}
-		case string:
-			message = v
-		case int:
-			status = v
-		case models.Model:
-			result = responses.MapTo(r, v)
-		}
-	}
-
-	responseData := DataMap{
-		"data": result,
-	}
-	if message != "" {
-		responseData["message"] = message
-	}
-
-	c.ResponseJson(responseData, status)
-}
-
 func (c *Controller) ResponseError(data interface{}, status int) {
-	// TODO рендерит страницы с ошибками заместо json, надо переопределить хандлер ошибок
+	// TODO в данный момент не учитывает кастомные ответы об ошибках предлагаемые фреймворком
 	switch data.(type) {
 	case DataMap, string:
 		c.ResponseJson(DataMap{"error": data}, status)

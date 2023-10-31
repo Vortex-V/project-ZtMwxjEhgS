@@ -250,10 +250,7 @@ func (c *RentController) End() {
 	if !c.ParseAndValidateQuery(form) {
 		return
 	}
-	err = rent.End(map[string]interface{}{
-		"lat":  form.Lat,
-		"long": form.Long,
-	})
+	err = rent.End(form.Lat, form.Long)
 	if err != nil {
 		c.ResponseError(err.Error(), 500)
 		return
