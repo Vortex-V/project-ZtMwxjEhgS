@@ -85,7 +85,27 @@ func (t *Rent) IsRenter(id int64) bool {
 
 func (t *Rent) IsOwner(id int64) bool {
 	_ = Read(t.Transport)
-	return t.Transport.Account.Id == id
+	return t.Transport.IsOwner(id)
+}
+
+func (t *Rent) CanRent(accountId int64, transport *Transport) error {
+	switch t.Type {
+	case RentTypeDays:
+		if transport.DayPrice == 0 {
+			return errors.New("для данного транспорта недоступна аренда по дням")
+		}
+	case RentTypeMinutes:
+		if transport.MinutePrice == 0 {
+			return errors.New("для данного транспорта недоступна аренда по минутам")
+		}
+	}
+	if !transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
+		return errors.New("данный транспорт не может быть арендован")
+	}
+	if transport.IsOwner(accountId) {
+		return errors.New("нельзя арендовать свой транспорт")
+	}
+	return nil
 }
 
 func (t *Rent) SetTimeStart(v string) (err error) {
@@ -104,61 +124,81 @@ func (t *Rent) SetType(v string) bool {
 }
 
 func (t *Rent) Create() error {
+	tx, _ := o.Begin()
+	defer tx.RollbackUnlessCommit()
+
 	if t.PriceOfUnit == 0 {
 		t.PriceOfUnit = t.GetPriceByRentType(t.Type)
 	}
 	// t.Transport.Status = TransportStatusRented TODO заместо изменения CanBeRented
 	t.Transport.CanBeRented = false
+	_, err := tx.Update(t.Transport)
+	if err != nil {
+		return err
+	}
+
 	if t.TimeStart.IsZero() {
 		t.TimeStart = time.Now()
 	}
 	t.Status = RentStatusActive
 
-	_, err := o.Insert(t)
+	_, err = tx.Insert(t)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return tx.Commit()
 }
 
 func (t *Rent) End(params map[string]interface{}) error {
-	_ = Read(t.Transport)
-	_ = Read(t.Transport.Account)
-	_ = Read(t.Account)
+	transport := t.Transport
+	_ = Read(transport)
+	ownerAccount := transport.Account
+	_ = Read(ownerAccount)
+	renterAccount := t.Account
+	_ = Read(renterAccount)
 
 	if t.Status != RentStatusActive {
 		return errors.New("нельзя завершить неактивную аренду")
 	}
-	// TODO Обернуть всё в транзакицю
+
+	tx, _ := o.Begin()
+	defer tx.RollbackUnlessCommit()
+
+	t.TimeEnd = time.Now()
 	t.calculateFinalPrice()
-	if t.Account.Balance < t.FinalPrice {
+	if renterAccount.Balance < t.FinalPrice {
 		return errors.New("недостаточно средств на счету")
 	}
 	// TODO хотелось бы учитывать комиссию сервиса
-	t.Transport.Account.Balance += t.FinalPrice
-	t.Account.Balance -= t.FinalPrice
-	_, err := o.Update(t.Transport.Account, "Balance")
+	ownerAccount.Balance += t.FinalPrice
+	renterAccount.Balance -= t.FinalPrice
+	_, err := tx.Update(ownerAccount, "Balance")
 	if err != nil {
 		return err
 	}
-	_, err = o.Update(t.Account, "Balance")
+	_, err = tx.Update(renterAccount, "Balance")
 	if err != nil {
 		return err
 	}
 
-	t.Transport.Latitude = (params["lat"]).(float64)
-	t.Transport.Longitude = (params["long"]).(float64)
-	t.Transport.CanBeRented = true
+	transport.Latitude = (params["lat"]).(float64)
+	transport.Longitude = (params["long"]).(float64)
+	transport.CanBeRented = true
 	// t.Transport.Status = TransportStatusNotRented TODO заместо изменения CanBeRented
-	_, err = o.Update(t.Transport)
+	_, err = tx.Update(transport)
 	if err != nil {
 		return err
 	}
 
-	t.TimeEnd = time.Now()
 	t.Status = RentStatusCompleted
 
-	_, err = o.Update(t)
+	_, err = tx.Update(t)
+	if err != nil {
+		return err
+	}
 
-	return err
+	return tx.Commit()
 }
 
 func (t *Rent) calculateFinalPrice() {
@@ -191,7 +231,7 @@ func RentSearch(params map[string]interface{}) (int64, []*Rent, error) {
 	}
 
 	if params["start"] != nil &&
-		params["count"] != nil {
+			params["count"] != nil {
 		start := params["start"].(int)
 		count := params["count"].(int)
 		qs = qs.Limit(count, (start-1)*count)

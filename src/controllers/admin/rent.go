@@ -141,12 +141,9 @@ func (c *AdminRentController) Post() {
 		c.ResponseError(controllers.ErrorNotFound, 404)
 		return
 	}
-	if rent.IsOwner(rent.Account.Id) {
-		c.ResponseError("Нельзя арендовать свой транспорт", 403)
-		return
-	}
-	if !rent.Transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
-		c.ResponseError("Транспорт уже арендован", 403)
+	// Передаём rent.Account.Id, так как созается аренда для этого пользователя
+	if err := rent.CanRent(rent.Account.Id, rent.Transport); err != nil {
+		c.ResponseError(err.Error(), 403)
 		return
 	}
 	err = rent.Create()
@@ -173,19 +170,12 @@ func (c *AdminRentController) Post() {
 // @Failure 404 not found
 // @router /Rent/End/:id [post]
 func (c *AdminRentController) End() {
-	accountId := c.GetIdentityId()
-	if accountId == 0 {
-		return
-	}
 	rentId := c.GetIdFormPath()
 	if rentId == 0 {
 		return
 	}
 
 	rent := c.findModel(rentId)
-	if !rent.IsRenter(accountId) {
-		c.ResponseError("Нет прав для завершения аренды", 403)
-	}
 
 	form := new(forms.RentEndForm)
 	if !c.ParseAndValidateQuery(form) {

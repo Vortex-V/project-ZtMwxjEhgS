@@ -202,12 +202,8 @@ func (c *RentController) New() {
 		c.ResponseError(ErrorNotFound, 404)
 		return
 	}
-	if rent.IsOwner(rent.Account.Id) {
-		c.ResponseError("Нельзя арендовать свой транспорт", 403)
-		return
-	}
-	if !rent.Transport.CanBeRented /*TODO || t.Transport.Status == TransportStatusRented*/ {
-		c.ResponseError("Транспорт уже арендован", 403)
+	if err := rent.CanRent(accountId, rent.Transport); err != nil {
+		c.ResponseError(err.Error(), 403)
 		return
 	}
 	err = rent.Create()
